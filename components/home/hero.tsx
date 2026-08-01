@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -99,6 +101,23 @@ export default function Hero() {
             </div>
           </div>
         </motion.div>
+        {/* Hero Actions */}
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+          <Button
+            size="lg"
+            className="h-12 rounded border border-emerald-500 bg-emerald-500/10 px-8 font-mono text-emerald-400 hover:bg-emerald-500 hover:text-black"
+          >
+            <Link href="/create">&gt; CREATE ROOM</Link>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="lg"
+            className="font-mono text-zinc-400 hover:text-white"
+          >
+            <Link href="#features">View Features ↓</Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
