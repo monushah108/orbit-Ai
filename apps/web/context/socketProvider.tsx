@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { handleMembers, handleMessage, useEmitter } from "../socket/chat";
 import { socket } from "../socket/socket";
 import { useRoomStore } from "../store/useRoomstore";
+import { useMemberStore } from "../store/useMemberstore";
 
 type SocketContextType = {
   sendMessage: (message: string) => void;
@@ -11,24 +12,25 @@ type SocketContextType = {
 const SocketContext = createContext<SocketContextType | null>(null);
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const roomId = useRoomStore((s) => s.room.id);
+  const roomId = "super man";
+  const user = "tony";
   useEffect(() => {
     socket.connect();
 
-    socket.emit("room:join", { roomId });
+    socket.emit("room:join", { roomId, user });
 
-    socket.on("member", handleMembers);
+    socket.on("members", handleMembers);
 
     socket.on("message", handleMessage);
 
     return () => {
       socket.disconnect();
       socket.off("message", handleMessage);
-      socket.off("member", handleMembers);
+      socket.off("members", handleMembers);
     };
   }, []);
 
-  const Emitters = useEmitter();
+  const Emitters = useEmitter(roomId);
 
   const value = useMemo(() => {
     return {

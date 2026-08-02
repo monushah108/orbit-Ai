@@ -1,18 +1,18 @@
 import { create } from "zustand";
 
 type Room = {
-  id: string;
+  roomId: string;
   duration: string;
   visibility: string;
 };
 interface RoomStoreType {
   room: Room;
-  generateRoom: (details: Room) => void;
+  setRoom: (details: Room) => void;
 }
 
 export const useRoomStore = create<RoomStoreType>((set) => ({
   room: {},
-  generateRoom: (details) => {
+  setRoom: (details) => {
     set(() => ({
       room: {
         ...details,

@@ -1,12 +1,29 @@
 import { create } from "zustand";
 
+export type ChatItem = {
+  id: string;
+  message: string;
+  timeStamp: Date;
+};
+
 interface ChatStore {
-  messages: string[];
-  setMessages: (messages: string[]) => void;
+  chats: ChatItem[];
+
+  addMessage: (message: string) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
-  messages: [],
+  chats: [],
 
-  setMessages: (messages: string[]) => set({ messages }),
+  addMessage: (message) =>
+    set((state) => ({
+      chats: [
+        ...state.chats,
+        {
+          id: crypto.randomUUID(),
+          message,
+          timeStamp: new Date(),
+        },
+      ],
+    })),
 }));
