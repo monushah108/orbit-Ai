@@ -1,5 +1,10 @@
 import http from "http";
 import SocketService from "./services/socket";
+import Redis from "ioredis";
+import { createAdapter } from "@socket.io/redis-adapter";
+
+const pub = new Redis(process.env.REDIS_URL!);
+const sub = pub.duplicate();
 
 function init() {
   const io = new SocketService().io;
@@ -7,6 +12,7 @@ function init() {
 
   const PORT = process.env.PORT ? process.env.PORT : 8000;
 
+  io.adapter(createAdapter(pub, sub));
   io.attach(httpServer);
 
   const users = new Map();
