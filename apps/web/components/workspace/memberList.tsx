@@ -1,9 +1,17 @@
 "use client";
 
 import { Member, useMemberStore } from "@/store/useMemberstore";
-import { HeadphoneOff, Headphones, Mic, MicOff, Users } from "lucide-react";
+import {
+  Bot,
+  HeadphoneOff,
+  Headphones,
+  Mic,
+  MicOff,
+  Users,
+} from "lucide-react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import useSocket from "@/context/socketProvider";
+import { useRoomStore } from "@/store/useRoomstore";
 
 export default function MemberList({
   open,
@@ -13,6 +21,7 @@ export default function MemberList({
   setOpen: (open: boolean) => void;
 }) {
   const { members } = useMemberStore();
+  const withBot = useRoomStore((s) => s.room?.withBot);
   const { Onmute, Ondeafened } = useSocket();
 
   console.log(members);
@@ -56,7 +65,7 @@ export default function MemberList({
 
           {members.map((member: Member) => {
             const isMe = member.id === useMemberStore.getState().user?.id;
-
+            const isAdmin = member.id == useRoomStore.getState().room?.adminId;
             return (
               <div
                 key={member.id}
@@ -73,7 +82,7 @@ export default function MemberList({
         hover:bg-emerald-500/5
       "
               >
-                <Avatar className="h-10 w-10 shrink-0 border border-emerald-900/40">
+                <Avatar className="h-11 w-11 border border-emerald-700/50 ring-1 ring-black">
                   <AvatarImage src={member.avatar} />
                 </Avatar>
 
@@ -89,6 +98,11 @@ export default function MemberList({
                     {isMe && (
                       <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400">
                         ME
+                      </span>
+                    )}
+                    {isAdmin && (
+                      <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400">
+                        AD
                       </span>
                     )}
                   </div>
@@ -130,6 +144,21 @@ export default function MemberList({
               </div>
             );
           })}
+
+          {withBot && (
+            <div className="mt-2 flex items-center gap-3 rounded-lg p-3.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-500/10">
+                <Bot className="h-4 w-4 text-cyan-400" />
+              </div>
+
+              <div className="flex-1">
+                <p className="text-sm font-medium text-zinc-100">Orbit AI</p>
+                <p className="text-xs text-zinc-500">Online</p>
+              </div>
+
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            </div>
+          )}
         </div>
       )}
     </aside>

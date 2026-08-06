@@ -9,7 +9,7 @@ type CreateRoomPayload = {
 
 export type Room = {
   id: string;
-  duration: "1" | "30m" | "1h" | "6h" | "12h" | "24h" | "Never";
+  duration: "1m" | "30m" | "1h" | "6h" | "12h" | "24h" | "Never";
   withBot: boolean;
   expiresAt: number;
   adminId: string;

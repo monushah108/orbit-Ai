@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useChatStore } from "../store/useChatstore";
 import { Member, useMemberStore, User } from "../store/useMemberstore";
 import { socket } from "./socket";
+import { Room, useRoomStore } from "@/store/useRoomstore";
 
 export const handleTyping = ({
   event,
@@ -37,19 +38,38 @@ export const handleMembers = (members: Member[]) => {
   useMemberStore.getState().addMembers(members);
 };
 
-export const useChatEmitter = (roomId: string) => {
+export const handleAiResponse = (res: string) => {
+  useChatStore.getState().botMessage(res);
+};
+
+export const useChatEmitter = () => {
   const user = useMemberStore((s) => s.user);
+  const room = useRoomStore((s) => s.room);
+  const roomId = room?.id;
+  const withBot = useRoomStore((s) => s.room?.withBot);
   const sendMessage = useCallback(
     (message: string) => {
       if (!roomId || !user?.id) return;
       console.log("emitter ", message);
+      const isBotMentioned = /(^|\s)@bot\b/i.test(message);
+
+      if (isBotMentioned && withBot) {
+        socket.emit("message", {
+          message,
+          roomId,
+          user,
+        });
+        socket.emit("ai:chat", { roomId, message });
+        return;
+      }
+
       socket.emit("message", {
         message,
         roomId,
         user,
       });
     },
-    [roomId, user],
+    [roomId, user, withBot],
   );
 
   const typing = useCallback(() => {

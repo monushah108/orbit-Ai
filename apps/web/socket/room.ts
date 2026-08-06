@@ -21,8 +21,8 @@ export function useRoomEmitter() {
         socket.emit("room:create", {
           roomId: room.id,
           duration: room.duration,
+          withBot: room.withBot,
           user,
-          withBot,
         });
 
         socket.once("room:created", ({ expiresAt }) => {
@@ -50,8 +50,8 @@ export function useRoomEmitter() {
           user,
         });
 
-        socket.once("room:joined", ({ duration, expiresAt }) => {
-          useRoomStore.getState().setRoom({ id: roomId, duration, expiresAt });
+        socket.once("room:joined", (data) => {
+          useRoomStore.getState().setRoom({ id: roomId, ...data });
           resolve();
         });
         socket.once("room:not-found", () => {

@@ -2,16 +2,16 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import {
+  handleAiResponse,
   handleMembers,
   handleMessage,
   handleTyping,
   useChatEmitter,
 } from "../socket/chat";
 import { socket } from "../socket/socket";
-import { Room, useRoomStore } from "@/store/useRoomstore";
+import { Room } from "@/store/useRoomstore";
 import { handleExpiry, useRoomEmitter } from "@/socket/room";
 import { handleDeafened, handleMute, useVoiceEmitter } from "@/socket/voice";
-import { useMemberStore } from "@/store/useMemberstore";
 
 type SocketContextType = {
   sendMessage: (message: string) => void;
@@ -29,8 +29,6 @@ type SocketContextType = {
 const SocketContext = createContext<SocketContextType | null>(null);
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const room = useRoomStore((state) => state.room);
-
   useEffect(() => {
     socket.connect();
 
@@ -44,11 +42,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("member:mute", handleMute);
     socket.on("member:deafen", handleDeafened);
 
+    socket.on("ai:token", handleAiResponse);
+
     socket.on("room:expired", handleExpiry);
 
     return () => {
       socket.off("members", handleMembers);
       socket.off("message", handleMessage);
+      socket.off("ai:token", handleAiResponse);
       socket.off("typing", handleTyping);
       socket.off("stop-typing", handleTyping);
       socket.off("member:mute", handleMute);
@@ -59,9 +60,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const chatEmitter = useChatEmitter(room?.id ?? "");
+  const chatEmitter = useChatEmitter();
   const roomEmitter = useRoomEmitter();
-  const voiceEmitter = useVoiceEmitter(room?.id ?? "");
+  const voiceEmitter = useVoiceEmitter();
 
   const value = {
     ...chatEmitter,

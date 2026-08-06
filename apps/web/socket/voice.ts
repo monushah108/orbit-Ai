@@ -1,6 +1,7 @@
 import { useMemberStore } from "@/store/useMemberstore";
 import { useCallback } from "react";
 import { socket } from "./socket";
+import { useRoomStore } from "@/store/useRoomstore";
 
 export const handleMute = ({
   memberId,
@@ -26,8 +27,10 @@ export const handleDeafened = ({
   useMemberStore.getState().setDeafened(memberId, deafened);
 };
 
-export function useVoiceEmitter(roomId: string) {
+export function useVoiceEmitter() {
   const memberId = useMemberStore((s) => s.user?.id);
+  const room = useRoomStore((state) => state.room);
+  const roomId = room?.id;
   console.log("voice emitter");
   const Onmute = useCallback(
     (isMuted: boolean) => {

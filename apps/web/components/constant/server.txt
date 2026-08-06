@@ -34,13 +34,14 @@ function init() {
   const rooms = new Map();
   io.on("connection", (socket) => {
     // ------ CREATE ROOM ------------- //
-    socket.on("room:create", ({ roomId, user, duration }) => {
-      console.log("create", { roomId, user, duration });
+    socket.on("room:create", ({ roomId, user, duration, withBot }) => {
+      console.log("create", { roomId, user, duration, withBot });
       rooms.set(roomId, {
         members: [user],
         adminId: user.id,
         duration,
         expiresAt: Date.now() + getDuration(duration),
+        withBot,
       });
       users.set(socket.id, {
         user,

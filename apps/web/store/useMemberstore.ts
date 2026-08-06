@@ -5,16 +5,16 @@ export type Member = {
   id: string;
   name: string;
   avatar: string;
-  mute: boolean;
-  deafen: boolean;
+  mute?: boolean;
+  deafen?: boolean;
 };
 
 export type User = {
   id: string;
   name: string;
   avatar: string;
-  mute: boolean;
-  deafen: boolean;
+  mute?: boolean;
+  deafen?: boolean;
 };
 
 interface MemberStore {

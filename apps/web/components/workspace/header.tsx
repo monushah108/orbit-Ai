@@ -61,15 +61,18 @@ export default function Header() {
           )}
         </button>
 
-        <div className="h-4 w-px bg-zinc-800" />
         {user?.id == room?.adminId && (
-          <button
-            onClick={destroyRoom}
-            className="cursor-pointer flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors"
-          >
-            <Bomb size={20} />
-            Destroy
-          </button>
+          <>
+            <div className="h-4 w-px bg-zinc-800" />
+
+            <button
+              onClick={destroyRoom}
+              className="cursor-pointer flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors"
+            >
+              <Bomb size={20} />
+              Destroy
+            </button>
+          </>
         )}
       </div>
 
