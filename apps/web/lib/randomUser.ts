@@ -8,7 +8,5 @@ export default function getUser() {
     id: crypto.randomUUID(),
     name,
     avatar,
-    mute: false,
-    deafen: false,
   };
 }

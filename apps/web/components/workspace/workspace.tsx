@@ -6,24 +6,25 @@ import Header from "./header";
 import MemberList from "./memberList";
 import { useRoomStore } from "@/store/useRoomstore";
 import RoomDestroyed from "./ui/roomDestroyed";
-// import { socket } from "@/socket/socket";
 
 export default function Workspace() {
   const [open, setOpen] = useState(true);
+  const destroyed = useRoomStore((s) => s.destroyed);
+  const room = useRoomStore((s) => s.room);
 
-  const { destroyed } = useRoomStore();
+  useEffect(() => {
+    if (!room?.id) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
 
-  // const room = useRoomStore((s) => s.room);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (room?.id) {
-  //       socket.emit("room:leave", {
-  //         roomId: room.id,
-  //       });
-  //     }
-  //   };
-  // }, [room?.id]);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [room?.id]);
 
   if (destroyed) {
     return <RoomDestroyed />;

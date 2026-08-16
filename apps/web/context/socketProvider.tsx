@@ -11,17 +11,14 @@ import {
 import { socket } from "../socket/socket";
 import { Room } from "@/store/useRoomstore";
 import { handleExpiry, useRoomEmitter } from "@/socket/room";
-import { handleDeafened, handleMute, useVoiceEmitter } from "@/socket/voice";
 
 type SocketContextType = {
   sendMessage: (message: string) => void;
   joinRoom: (roomId: string) => Promise<void>;
   createRoom: (room: Room) => Promise<void>;
   DestroyRoom: (roomId: string) => void;
-
-  Onmute: (isMuted: boolean) => void;
-  Ondeafened: (isDeafened: boolean) => void;
-
+  checkRoomExists: (roomId: string) => void;
+  LeaveRoom: (roomId: string) => void;
   typing: () => void;
   stopTyping: () => void;
 };
@@ -39,9 +36,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("typing", handleTyping);
     socket.on("stop-typing", handleTyping);
 
-    socket.on("member:mute", handleMute);
-    socket.on("member:deafen", handleDeafened);
-
     socket.on("ai:token", handleAiResponse);
 
     socket.on("room:expired", handleExpiry);
@@ -52,8 +46,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socket.off("ai:token", handleAiResponse);
       socket.off("typing", handleTyping);
       socket.off("stop-typing", handleTyping);
-      socket.off("member:mute", handleMute);
-      socket.off("member:deafen", handleDeafened);
+
       socket.off("room:expired", handleExpiry);
 
       socket.disconnect();
@@ -62,12 +55,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   const chatEmitter = useChatEmitter();
   const roomEmitter = useRoomEmitter();
-  const voiceEmitter = useVoiceEmitter();
 
   const value = {
     ...chatEmitter,
     ...roomEmitter,
-    ...voiceEmitter,
   };
 
   return (

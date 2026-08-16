@@ -13,7 +13,6 @@ export const handleTyping = ({
 }) => {
   switch (event) {
     case "typing":
-      console.log(user, event);
       useChatStore.getState().addTypingUser(user);
       break;
     case "stop-typing":
@@ -29,12 +28,10 @@ export const handleMessage = ({
   message: string;
   user: User;
 }) => {
-  console.log("receiver ", message);
   useChatStore.getState().addMessage(message, user);
 };
 
 export const handleMembers = (members: Member[]) => {
-  console.log("member handler ", members);
   useMemberStore.getState().addMembers(members);
 };
 
@@ -50,16 +47,24 @@ export const useChatEmitter = () => {
   const sendMessage = useCallback(
     (message: string) => {
       if (!roomId || !user?.id) return;
-      console.log("emitter ", message);
+
       const isBotMentioned = /(^|\s)@bot\b/i.test(message);
 
       if (isBotMentioned && withBot) {
+        useChatStore.getState().setLoading(false);
         socket.emit("message", {
           message,
           roomId,
           user,
         });
-        socket.emit("ai:chat", { roomId, message });
+        socket.emit("ai:chat", { roomId, message, user });
+        socket.on("ai:done", () => {
+          useChatStore.getState().setLoading(false);
+        });
+
+        socket.on("ai:error", ({ message }) =>
+          useChatStore.getState().setError(message),
+        );
         return;
       }
 

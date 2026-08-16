@@ -11,17 +11,27 @@ export type ChatItem = {
 interface ChatStore {
   chats: ChatItem[];
   typingUsers: User[];
+  loading: boolean;
+  error: string | null;
+
   addTypingUser: (user: User) => void;
   removeTypingUser: (id: string) => void;
+
   addMessage: (message: string, sender: User) => void;
   botMessage: (chunk: string) => void;
+
   setMessages: (messages: ChatItem[]) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (err: string) => void;
   clearMessages: () => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
   chats: [],
   typingUsers: [],
+  loading: false,
+  error: null,
+
   addTypingUser: (user) =>
     set((state) => ({
       typingUsers: state.typingUsers.some((u) => u.id === user.id)
@@ -33,6 +43,7 @@ export const useChatStore = create<ChatStore>((set) => ({
     set((state) => ({
       typingUsers: state.typingUsers.filter((u) => u.id !== id),
     })),
+
   addMessage: (message, sender) =>
     set((state) => ({
       chats: [
@@ -45,17 +56,15 @@ export const useChatStore = create<ChatStore>((set) => ({
         },
       ],
     })),
+
   botMessage: (chunk) =>
     set((state) => {
       const chats = [...state.chats];
-
       const last = chats[chats.length - 1];
 
       if (last?.sender.id === "bot") {
-        // AI is already replying → append new streamed text
         last.message += chunk;
       } else {
-        // First chunk → create a new bot message
         chats.push({
           id: crypto.randomUUID(),
           message: chunk,
@@ -70,13 +79,25 @@ export const useChatStore = create<ChatStore>((set) => ({
 
       return { chats };
     }),
+
   setMessages: (messages) =>
     set({
       chats: messages,
     }),
 
+  setLoading: (loading) =>
+    set({
+      loading,
+    }),
+
+  setError: (err) =>
+    set({
+      error: err,
+    }),
+
   clearMessages: () =>
     set({
       chats: [],
+      loading: false,
     }),
 }));

@@ -1,15 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type CreateRoomPayload = {
-  id: string;
-  duration: "1" | "30m" | "1h" | "6h" | "12h" | "24h" | "Never";
-  withBot: boolean;
-};
-
 export type Room = {
   id: string;
-  duration: "1m" | "30m" | "1h" | "6h" | "12h" | "24h" | "Never";
+  duration: "1m" | "30m" | "1h" | "6h";
   withBot: boolean;
   expiresAt: number;
   adminId: string;

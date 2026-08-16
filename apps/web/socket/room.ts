@@ -2,10 +2,11 @@ import { useCallback } from "react";
 import { socket } from "./socket";
 import { useMemberStore } from "@/store/useMemberstore";
 import { useRoomStore, type Room } from "@/store/useRoomstore";
+import { useChatStore } from "@/store/useChatstore";
 
 export const handleExpiry = () => {
-  console.log("room:expired");
   useRoomStore.getState().destroyRoom();
+  useChatStore.getState().clearMessages();
 };
 
 export function useRoomEmitter() {
@@ -29,6 +30,11 @@ export function useRoomEmitter() {
           useRoomStore.getState().setExpiry(expiresAt);
           resolve();
         });
+        socket.once("room:blocked", ({ message }) => {
+          useRoomStore.getState().setError(message || "Room not found");
+
+          reject(new Error(message || "Room not found"));
+        });
         socket.once("room:error", (message: string) => {
           reject(new Error(message));
           useRoomStore.getState().setError("room creation failed !!");
@@ -45,18 +51,36 @@ export function useRoomEmitter() {
       }
 
       return new Promise<void>((resolve, reject) => {
+        socket.once("room:joined", (data) => {
+          console.log("ROOM JOINED:", data);
+
+          useRoomStore.getState().setRoom({
+            id: roomId,
+            ...data,
+          });
+
+          resolve();
+        });
+
+        socket.once("room:failed", ({ err }) => {
+          console.error("ROOM JOIN FAILED:", err);
+
+          useRoomStore.getState().setError(err || "Room not found");
+
+          reject(new Error(err || "Room not found"));
+        });
+
+        socket.once("room:blocked", ({ message }) => {
+          useRoomStore.getState().setError(message || "Room not found");
+
+          reject(new Error(message || "Room not found"));
+        });
+
+        console.log("joining room:", roomId);
+
         socket.emit("room:join", {
           roomId,
           user,
-        });
-
-        socket.once("room:joined", (data) => {
-          useRoomStore.getState().setRoom({ id: roomId, ...data });
-          resolve();
-        });
-        socket.once("room:not-found", () => {
-          useRoomStore.getState().setError("room not found");
-          reject(new Error("Room not found"));
         });
       });
     },
@@ -67,9 +91,19 @@ export function useRoomEmitter() {
     socket.emit("room:destroy", { roomId });
   }, []);
 
+  const checkRoomExists = useCallback((roomId: string) => {
+    socket.emit("room:check", { roomId });
+  }, []);
+
+  const LeaveRoom = useCallback((roomId: string) => {
+    socket.emit("room:leave", { roomId });
+  }, []);
+
   return {
     createRoom,
     joinRoom,
     DestroyRoom,
+    checkRoomExists,
+    LeaveRoom,
   };
 }

@@ -13,9 +13,9 @@ import { useRoomStore } from "@/store/useRoomstore";
 import { toast } from "sonner";
 import { Bot, BotOff, Copy, RefreshCw, Sparkles } from "lucide-react";
 
-type Duration = "1m" | "30m" | "1h" | "6h" | "Never";
+type Duration = "1m" | "30m" | "1h" | "6h";
 
-const durations: Duration[] = ["1m", "30m", "1h", "6h", "Never"];
+const durations: Duration[] = ["1m", "30m", "1h", "6h"];
 
 export default function CreateRoom() {
   const [roomId, setRoomId] = useState("");

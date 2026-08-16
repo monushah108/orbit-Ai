@@ -1,222 +1,480 @@
 import Groq from "groq-sdk";
 import { Server } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
+import Redis from "ioredis";
+import { getDuration, ORBIT_AI_INSTRUCTIONS } from "../helper";
 
-// import Redis from "ioredis";
-// import { createAdapter } from "@socket.io/redis-adapter";
-
-// const pub = new Redis(process.env.REDIS_URL!);
-// const sub = pub.duplicate();
 const groq = new Groq({
   apiKey: process.env.AI_API_KEY!,
 });
 
+type User = {
+  id: string;
+  name: string;
+  avatar?: string;
+};
+
+type Room = {
+  roomId: string;
+  adminId: string;
+  members: User[];
+  duration: string;
+  expiresAt: number;
+  withBot: boolean;
+};
+
+type UserSession = {
+  user: User;
+  roomId: string;
+};
+
 class SocketService {
   private _io: Server;
 
+  private redis: Redis;
+  private redisSubscriber: Redis;
+
+  // Socket connection -> user information
+  private users = new Map<string, UserSession>();
+
   constructor() {
-    this._io = new Server();
+    this._io = new Server({
+      cors: {
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+      },
+    });
+
+    this.redis = new Redis(process.env.REDIS_URL!);
+
+    // Separate Redis connection is required for subscriptions.
+    this.redisSubscriber = this.redis.duplicate();
+
+    this.setupRedis();
+  }
+
+  private async setupRedis() {
+    try {
+      await this.redisSubscriber.psubscribe("__keyevent@0__:expired");
+
+      this.redisSubscriber.on("pmessage", async (_pattern, _channel, key) => {
+        await this.handleRedisExpiration(key);
+      });
+
+      console.log("Redis expiration listener started");
+    } catch (error) {
+      console.error("Redis subscription error:", error);
+    }
+  }
+
+  private async handleRedisExpiration(key: string) {
+    if (!key.startsWith("orbit:room:")) {
+      return;
+    }
+
+    const roomId = key.replace("orbit:room:", "");
+
+    console.log(`Room expired: ${roomId}`);
+
+    // Remove users belonging to this room
+    for (const [socketId, session] of this.users) {
+      if (session.roomId === roomId) {
+        this.users.delete(socketId);
+      }
+    }
+
+    // Notify everyone in the Socket.IO room
+    this.io.to(roomId).emit("room:expired");
   }
 
   public initListeners() {
     const io = this.io;
-    // io.adapter(createAdapter(pub, sub));
-    const getDuration = (expiresAt: string) => {
-      switch (expiresAt) {
-        case "1m":
-          return 1 * 60 * 1000;
-        case "30m":
-          return 30 * 60 * 1000; // 30 minutes
-        case "1h":
-          return 60 * 60 * 1000; // 1 hour
-        case "6h":
-          return 6 * 60 * 60 * 1000; // 6 hours
-        default:
-          return Infinity;
-      }
-    };
 
-    const users = new Map();
-    const rooms = new Map();
+    // Socket.IO Redis adapter
+    const pubClient = new Redis(process.env.REDIS_URL!);
+    const subClient = pubClient.duplicate();
+
+    io.adapter(createAdapter(pubClient, subClient));
+
     io.on("connection", (socket) => {
-      // ------ CREATE ROOM ------------- //
-      socket.on("room:create", ({ roomId, user, duration, withBot }) => {
-        rooms.set(roomId, {
-          members: [user],
-          adminId: user.id,
-          duration,
-          expiresAt: Date.now() + getDuration(duration),
-          withBot,
-        });
-        console.log("create", rooms);
+      // --------------------------------
+      // CREATE ROOM
+      // --------------------------------
 
-        users.set(socket.id, {
-          user,
-          roomId,
-        });
-        socket.join(roomId);
-        io.to(roomId).emit("members", rooms.get(roomId).members);
-        console.log("members", rooms.get(roomId).members);
-        io.to(roomId).emit("room:created", {
-          expiresAt: rooms.get(roomId).expiresAt,
-        });
-      });
-      // ------ JOIN ROOM ------------- //
+      // socket.on("room:create", async ({ roomId, user, duration, withBot }) => {
+      //   try {
+      //     const expiresIn = getDuration(duration);
 
-      socket.on("room:join", ({ roomId, user }) => {
-        console.log(roomId, user);
-        const room = rooms.get(roomId);
-        console.log(rooms.get(roomId));
+      //     const expiresAt = Date.now() + expiresIn;
 
-        if (!room) {
-          console.log("server", rooms);
-          socket.emit("room:not-found");
+      //     const room: Room = {
+      //       roomId,
+      //       adminId: user.id,
+      //       members: [user],
+      //       duration,
+      //       expiresAt,
+      //       withBot,
+      //     };
+
+      //     // Store room in Redis
+      //     await this.redis.set(
+      //       `orbit:room:${roomId}`,
+      //       JSON.stringify(room),
+      //       "PX",
+      //       expiresIn,
+      //     );
+
+      //     // Store socket -> user session locally
+      //     this.users.set(socket.id, {
+      //       user,
+      //       roomId,
+      //     });
+
+      //     socket.join(roomId);
+
+      //     io.to(roomId).emit("members", room.members);
+
+      //     io.to(roomId).emit("room:created", {
+      //       expiresAt,
+      //     });
+
+      //     console.log(`Room created: ${roomId}`);
+      //   } catch (error) {
+      //     console.error("Room creation error:", error);
+
+      //     socket.emit("room:failed", {
+      //       err: "Failed to create room",
+      //     });
+      //   }
+      // });
+
+      socket.on("room:create", async ({ roomId, user, duration, withBot }) => {
+        const existingSession = this.users.get(socket.id);
+
+        if (existingSession?.roomId) {
+          socket.emit("room:blocked", {
+            roomId: existingSession.roomId,
+            message: "You are already in a room. Leave it first.",
+          });
+
           return;
         }
+        try {
+          const expiresIn = getDuration(duration);
+          const expiresAt = Date.now() + expiresIn;
+
+          const room: Room = {
+            roomId,
+            adminId: user.id,
+            members: [user],
+            duration,
+            expiresAt,
+            withBot,
+          };
+
+          const key = `orbit:room:${roomId}`;
+
+          await this.redis.set(key, JSON.stringify(room), "PX", expiresIn);
+
+          this.users.set(socket.id, {
+            user,
+            roomId,
+          });
+
+          socket.join(roomId);
+
+          io.to(roomId).emit("members", room.members);
+
+          io.to(roomId).emit("room:created", {
+            expiresAt,
+          });
+
+          console.log(`Room created: ${roomId}`);
+        } catch (error) {
+          console.error("Room creation error:", error);
+
+          socket.emit("room:failed", {
+            err: "Failed to create room",
+          });
+        }
+      });
+
+      // --------------------------------
+      // JOIN ROOM
+      // --------------------------------
+
+      socket.on("room:join", async ({ roomId, user }) => {
+        console.log("JOIN REQUEST:", roomId, user);
+
+        const existingSession = this.users.get(socket.id);
+
+        if (existingSession?.roomId) {
+          socket.emit("room:blocked", {
+            roomId: existingSession.roomId,
+            message: "You are already in a room. Leave it first.",
+          });
+
+          return;
+        }
+
+        const key = `orbit:room:${roomId}`;
+
+        const roomData = await this.redis.get(key);
+
+        if (!roomData) {
+          socket.emit("room:failed", {
+            err: "Room not found or expired",
+          });
+
+          return;
+        }
+
+        const room = JSON.parse(roomData);
 
         if (Date.now() >= room.expiresAt) {
-          rooms.delete(roomId);
-          socket.emit("room:not-found");
+          await this.redis.del(key);
+
+          socket.emit("room:failed", {
+            err: "Room has already expired",
+          });
+
           return;
         }
 
-        users.set(socket.id, {
+        // Prevent duplicate join
+        const alreadyJoined = room.members.some(
+          (member: User) => member.id === user.id,
+        );
+
+        if (!alreadyJoined) {
+          room.members.push(user);
+        }
+
+        await this.redis.set(
+          key,
+          JSON.stringify(room),
+          "PX",
+          room.expiresAt - Date.now(),
+        );
+
+        this.users.set(socket.id, {
           user,
           roomId,
         });
 
-        rooms.get(roomId).members.push(user);
-
         socket.join(roomId);
 
-        io.to(roomId).emit("members", rooms.get(roomId).members);
+        // Update everyone
+        io.to(roomId).emit("members", room.members);
 
-        io.to(roomId).emit("room:joined", rooms.get(roomId));
-        console.log("members", rooms.get(roomId).members);
+        // Tell ONLY the joining socket
+        socket.emit("room:joined", room);
+
+        console.log(`${user.name} joined ${roomId}`);
       });
-      // ------ DESTORY ROOM ------------- //
-      socket.on("room:destroy", ({ roomId }) => {
-        const room = rooms.get(roomId);
-        console.log(room);
-        if (!room) return;
 
-        for (const [socketId, user] of users) {
-          if (user.roomId === roomId) {
-            users.delete(socketId);
+      // --------------------------------
+      // DESTROY ROOM
+      // --------------------------------
+
+      socket.on("room:destroy", async ({ roomId }) => {
+        try {
+          const key = `orbit:room:${roomId}`;
+
+          const roomData = await this.redis.get(key);
+
+          if (!roomData) {
+            return;
           }
-        }
 
-        rooms.delete(roomId);
-        io.to(roomId).emit("room:expired");
+          await this.redis.del(key);
 
-        console.log(`${roomId} destroyed`);
-      });
-      // ------  ROOM EXPIRY INTERVAL ------------- //
-      const time = setInterval(() => {
-        const now = Date.now();
-
-        for (const [roomId, room] of rooms) {
-          if (now >= room.expiresAt) {
-            rooms.delete(roomId);
-            console.log("expired", rooms);
-            io.to(roomId).emit("room:expired");
+          for (const [socketId, session] of this.users) {
+            if (session.roomId === roomId) {
+              this.users.delete(socketId);
+            }
           }
-        }
-      }, 1000);
 
-      // ------  USER LEFT ROOM ------------- //
-      socket.on("room:leave", ({ roomId }) => {
-        socket.leave(roomId);
+          io.to(roomId).emit("room:expired");
 
-        users.delete(socket.id);
-
-        const members = [...users.values()]
-          .filter((m) => m.roomId === roomId)
-          .map((m) => m.user);
-
-        io.to(roomId).emit("members", members);
-
-        if (members.length === 0) {
-          rooms.delete(roomId);
+          console.log(`Room destroyed: ${roomId}`);
+        } catch (error) {
+          console.error("Destroy room error:", error);
         }
       });
-      // ------ TYPING ------------- //
+
+      // --------------------------------
+      // CHECK ROOM
+      // --------------------------------
+      socket.on("room:check", async ({ roomId }) => {
+        const exists = await this.redis.exists(`orbit:room:${roomId}`);
+
+        if (!exists) {
+          io.to(roomId).emit("room:expired");
+          return;
+        }
+
+        socket.emit("room:still-active");
+      });
+
+      // --------------------------------
+      // LEAVE ROOM
+      // --------------------------------
+
+      socket.on("room:leave", async ({ roomId }) => {
+        try {
+          const session = this.users.get(socket.id);
+
+          socket.leave(roomId);
+
+          this.users.delete(socket.id);
+
+          const key = `orbit:room:${roomId}`;
+
+          const roomData = await this.redis.get(key);
+
+          if (!roomData) {
+            return;
+          }
+
+          const room: Room = JSON.parse(roomData);
+
+          if (session) {
+            room.members = room.members.filter(
+              (member) => member.id !== session.user.id,
+            );
+          }
+
+          const ttl = room.expiresAt - Date.now();
+
+          if (ttl > 0) {
+            await this.redis.set(key, JSON.stringify(room), "PX", ttl);
+          }
+
+          this.io.to(roomId).emit("members", room.members);
+
+          if (room.members.length === 0) {
+            await this.redis.del(key);
+          }
+        } catch (error) {
+          console.error("Leave room error:", error);
+        }
+      });
+      // --------------------------------
+      // TYPING
+      // --------------------------------
+
       socket.on("typing", ({ roomId, user }) => {
-        socket.to(roomId).emit("typing", { event: "typing", user });
+        socket.to(roomId).emit("typing", {
+          event: "typing",
+          user,
+        });
       });
 
       socket.on("stop-typing", ({ roomId, user }) => {
-        socket.to(roomId).emit("stop-typing", { event: "stop-typing", user });
+        socket.to(roomId).emit("stop-typing", {
+          event: "stop-typing",
+          user,
+        });
       });
 
-      // ------ MESSAGEING ------------- //
+      // --------------------------------
+      // MESSAGE
+      // --------------------------------
+
       socket.on("message", ({ roomId, message, user }) => {
-        console.log("message ", { roomId, message, user });
         io.to(roomId).emit("message", {
           message,
           user,
         });
       });
 
-      // ------ AI CHAT RESPONSE  ------------- //
-      socket.on("ai:chat", async ({ roomId, message }) => {
-        const stream = await groq.chat.completions.create({
-          model: process.env.AI_MODEL!,
-          messages: [
-            {
-              role: "user",
-              content: message,
-            },
-          ],
-          stream: true,
-        });
+      // --------------------------------
+      // AI CHAT
+      // --------------------------------
 
-        for await (const chunk of stream) {
-          const token = chunk.choices[0]?.delta?.content;
+      socket.on("ai:chat", async ({ roomId, message, user }) => {
+        io.to(roomId).emit("ai:loading", true);
 
-          if (token) {
-            io.to(roomId).emit("ai:token", token);
+        try {
+          const stream = await groq.chat.completions.create({
+            model: process.env.AI_MODEL!,
+            messages: [
+              {
+                role: "system",
+                content: ORBIT_AI_INSTRUCTIONS,
+              },
+              {
+                role: "user",
+                content: `
+The current message was sent by ${user.name}.
+
+Message:
+${message}
+`,
+              },
+            ],
+            stream: true,
+          });
+
+          for await (const chunk of stream) {
+            const token = chunk.choices[0]?.delta?.content;
+
+            if (token) {
+              io.to(roomId).emit("ai:token", token);
+            }
           }
+
+          io.to(roomId).emit("ai:done");
+        } catch (error) {
+          console.error("AI error:", error);
+
+          io.to(roomId).emit("ai:error", {
+            message: "Something went wrong while generating the response.",
+          });
+        }
+      });
+
+      // --------------------------------
+      // DISCONNECT
+      // --------------------------------
+
+      socket.on("disconnect", async () => {
+        const session = this.users.get(socket.id);
+
+        if (!session) {
+          return;
         }
 
-        io.to(roomId).emit("ai:done");
-      });
+        const { roomId } = session;
 
-      // -------- USER AWERENECE ------------- //
+        this.users.delete(socket.id);
 
-      socket.on("member:mute", ({ roomId, memberId, muted }) => {
-        // update member
-        console.log("mute", { roomId, memberId, muted });
-        io.to(roomId).emit("member:mute", {
-          memberId,
-          muted,
-        });
-      });
+        const key = `orbit:room:${roomId}`;
 
-      socket.on("member:deafen", ({ roomId, memberId, deafened }) => {
-        console.log("deafened", { roomId, memberId, deafened });
-        io.to(roomId).emit("member:deafen", {
-          memberId,
-          deafened,
-        });
-      });
+        const roomData = await this.redis.get(key);
 
-      // -------------- SIGNALING MEDIASOUP ------------------ //
-      socket.on("receiver", ({ roomId }) => {
-        socket.to(roomId).emit("transport", {});
-      });
+        if (!roomData) {
+          return;
+        }
 
-      socket.on("disconnect", () => {
-        const member = users.get(socket.id);
+        const room: Room = JSON.parse(roomData);
 
-        if (!member) return;
+        room.members = room.members.filter(
+          (member) => member.id !== session.user.id,
+        );
 
-        users.delete(socket.id);
+        const ttl = room.expiresAt - Date.now();
 
-        const members = [...users.values()]
-          .filter((m) => m.roomId === member.roomId)
-          .map((m) => m.user);
+        if (ttl > 0) {
+          await this.redis.set(key, JSON.stringify(room), "PX", ttl);
+        }
 
-        io.to(member.roomId).emit("members", members);
+        io.to(roomId).emit("members", room.members);
+
+        if (room.members.length === 0) {
+          await this.redis.del(key);
+        }
       });
     });
   }

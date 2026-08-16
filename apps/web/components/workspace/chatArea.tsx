@@ -9,6 +9,8 @@ import EmojiPicker, { Theme } from "emoji-picker-react";
 import { Smile } from "lucide-react";
 import { useRoomStore } from "@/store/useRoomstore";
 import EmptyChatBotState from "./ui/emptyState";
+import Bubble from "./ui/bubble";
+import { Mobile } from "./ui/mobile";
 
 export default function ChatArea({
   open,
@@ -18,7 +20,6 @@ export default function ChatArea({
   setOpen: (open: boolean) => void;
 }) {
   const [inputValue, setInputValue] = useState("");
-  const [Iscopy, setIscopy] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { chats, typingUsers } = useChatStore();
   const withBot = useRoomStore((s) => s.room?.withBot);
@@ -26,8 +27,6 @@ export default function ChatArea({
   const currentUser = useMemberStore((s) => s.user);
   const bottomRef = useRef(null);
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  console.log(chats);
 
   const isBotMentioned = /(^|\s)@bot\b/i.test(inputValue) && withBot;
 
@@ -58,26 +57,16 @@ export default function ChatArea({
     }, 1000);
   };
 
-  const handleCopy = async (message: string) => {
-    try {
-      await navigator.clipboard.writeText(message);
-      setIscopy(true);
-      setTimeout(() => setIscopy(false), 1000);
-    } catch {
-      setIscopy(false);
-    }
-  };
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: "auto",
     });
   }, [chats]);
 
   return (
-    <section className="flex flex-1 flex-col bg-[#050805]">
+    <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col bg-[#050805]">
       {/* Terminal Header */}
-      <div className="flex items-center gap-3 border-b border-emerald-900/40 bg-black px-5 py-3">
+      {/* <div className="flex items-center gap-3 border-b border-emerald-900/40 bg-black px-5 py-3">
         <span className="h-3 w-3 rounded-full bg-red-500" />
         <span className="h-3 w-3 rounded-full bg-yellow-500" />
         <span className="h-3 w-3 rounded-full bg-green-500" />
@@ -86,17 +75,71 @@ export default function ChatArea({
           orbit-ai://terminal
         </span>
 
-        {open ? (
-          <SidebarClose
-            onClick={() => setOpen(false)}
-            className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
-          />
-        ) : (
-          <SidebarOpen
-            onClick={() => setOpen(true)}
-            className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
-          />
-        )}
+        <Mobile />
+
+        <div className="md:flex hidden">
+          {open ? (
+            <SidebarClose
+              onClick={() => setOpen(false)}
+              className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
+            />
+          ) : (
+            <SidebarOpen
+              onClick={() => setOpen(true)}
+              className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
+            />
+          )}
+        </div>
+      </div> */}
+
+      <div className="flex h-11 items-center border-b border-zinc-800 bg-black px-3 sm:px-4">
+        {/* Terminal name */}
+        <div className="flex items-center gap-2">
+          {" "}
+          <span className="h-3 w-3 rounded-full bg-red-500" />
+          <span className="h-3 w-3 rounded-full bg-yellow-500" />
+          <span className="h-3 w-3 rounded-full bg-green-500" />
+          <span className="truncate font-mono text-xs text-emerald-500 sm:text-sm">
+            orbit-ai://terminal
+          </span>
+        </div>
+
+        {/* Controls */}
+        <div className="ml-auto flex items-center gap-1">
+          {/* Mobile members */}
+          <div className="md:hidden">
+            <Mobile />
+          </div>
+
+          {/* Desktop sidebar */}
+          <div className="hidden md:flex">
+            {open ? (
+              <SidebarClose
+                onClick={() => setOpen(false)}
+                className="
+            h-4
+            w-4
+            cursor-pointer
+            text-emerald-600
+            transition
+            hover:text-emerald-400
+          "
+              />
+            ) : (
+              <SidebarOpen
+                onClick={() => setOpen(true)}
+                className="
+            h-4
+            w-4
+            cursor-pointer
+            text-emerald-600
+            transition
+            hover:text-emerald-400
+          "
+              />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Messages */}
@@ -114,103 +157,12 @@ export default function ChatArea({
         ) : (
           <ScrollArea className="h-full">
             <div className="space-y-4 px-5 py-4 font-mono">
-              {chats.map((chat) => {
-                const isMe = chat.sender.id === currentUser?.id;
-                const isBot = chat.sender.id === "bot";
+              {chats.map((item) => {
+                const isMe = item.sender.id === currentUser?.id;
+                const isBot = item.sender.id === "bot";
+
                 return (
-                  <div key={chat.id}>
-                    {isBot ? (
-                      <div className="flex gap-3 py-2">
-                        {/* Avatar */}
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-500/10">
-                          <Bot className="h-4 w-4 text-cyan-400" />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1">
-                          <div className="mb-3 flex items-center gap-2">
-                            <span className="text-sm font-medium text-cyan-300">
-                              Orbit AI
-                            </span>
-
-                            <span className="rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-300">
-                              AI
-                            </span>
-                          </div>
-
-                          <div className="border-l-2 border-cyan-500/70 pl-4">
-                            <p className="whitespace-pre-wrap leading-7 text-zinc-200">
-                              {chat.message}
-                            </p>
-                          </div>
-
-                          <div className="mt-3 flex items-center gap-2">
-                            <button
-                              onClick={() => handleCopy(chat.message)}
-                              className="rounded p-1.5 text-zinc-500 transition hover:bg-zinc-800 hover:text-cyan-400"
-                            >
-                              {Iscopy ? (
-                                <CopyCheck className="h-3.5 w-3.5" />
-                              ) : (
-                                <Copy className="h-3.5 w-3.5" />
-                              )}
-                            </button>
-
-                            <span className="ml-auto text-xs text-zinc-600">
-                              {new Date(chat.timestamp).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Prompt */}
-                        <div className="mb-2 flex items-center gap-2 text-sm">
-                          <span
-                            className={
-                              isMe ? "text-emerald-400" : "text-cyan-400"
-                            }
-                          >
-                            {isMe
-                              ? `${chat.sender.name}@orbit`
-                              : chat.sender.name}
-                          </span>
-
-                          <span className="text-zinc-600">
-                            {isMe ? "$" : "response:"}
-                          </span>
-                        </div>
-
-                        {/* Message */}
-                        <div
-                          className={`rounded-lg border px-4 py-3 transition-all ${
-                            isMe
-                              ? "border-zinc-800 bg-black/40"
-                              : "border-emerald-900/50 bg-emerald-500/5 shadow-[0_0_30px_rgba(16,185,129,0.08)]"
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap leading-7 text-zinc-300">
-                            {chat.message}
-                          </p>
-                        </div>
-                        <div
-                          className={`text-xs mt-2 ${
-                            isMe
-                              ? "text-right text-zinc-600"
-                              : "text-left text-zinc-600"
-                          }`}
-                        >
-                          {new Date(chat.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <Bubble key={item.id} isMe={isMe} isBot={isBot} item={item} />
                 );
               })}
 
