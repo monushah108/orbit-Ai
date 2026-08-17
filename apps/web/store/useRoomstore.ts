@@ -5,8 +5,8 @@ export type Room = {
   id: string;
   duration: "1m" | "30m" | "1h" | "6h";
   withBot: boolean;
-  expiresAt: number;
-  adminId: string;
+  expiresAt?: number;
+  adminId?: string;
 };
 
 interface RoomStore {

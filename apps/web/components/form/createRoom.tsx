@@ -11,7 +11,7 @@ import { useMemberStore } from "@/store/useMemberstore";
 import { useRoomStore } from "@/store/useRoomstore";
 
 import { toast } from "sonner";
-import { Bot, BotOff, Copy, RefreshCw, Sparkles } from "lucide-react";
+import { Bot, BotOff, Copy, Loader2, RefreshCw, Sparkles } from "lucide-react";
 
 type Duration = "1m" | "30m" | "1h" | "6h";
 
@@ -21,7 +21,7 @@ export default function CreateRoom() {
   const [roomId, setRoomId] = useState("");
   const [withBot, setWithBot] = useState(false);
   const [duration, setDuration] = useState<Duration>("1m");
-
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const adminId = useMemberStore((s) => s.user?.id);
@@ -49,6 +49,8 @@ export default function CreateRoom() {
       return;
     }
 
+    setLoading(true);
+
     try {
       setRoom({
         id: roomId,
@@ -64,10 +66,15 @@ export default function CreateRoom() {
       });
 
       router.push(`/workspace/${roomId}?d=${duration}`);
-    } catch (err: any) {
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+
       toast.error("Failed to create room", {
-        description: err?.message ?? "Something went wrong.",
+        description: message,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -229,25 +236,32 @@ export default function CreateRoom() {
 
       <Button
         type="submit"
-        disabled={!roomId}
+        disabled={!roomId || loading}
         className={`
-          h-14
-          w-full
-          rounded-lg
-          border
-          font-mono
-          text-base
-          font-semibold
-          transition-all
+    h-14
+    w-full
+    rounded-lg
+    border
+    font-mono
+    text-base
+    font-semibold
+    transition-all
 
-          ${
-            roomId
-              ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black"
-              : "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
-          }
-        `}
+    ${
+      roomId && !loading
+        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black"
+        : "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
+    }
+  `}
       >
-        ENTER ORBIT →
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Creating room...
+          </span>
+        ) : (
+          "ENTER ORBIT →"
+        )}
       </Button>
 
       {/* Footer */}
