@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 
 import LiveTime from "./ui/liveTime";
 
-export function Navbar() {
+export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-800 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
