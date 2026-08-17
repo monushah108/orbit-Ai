@@ -2,7 +2,7 @@
 import useSocket from "@/context/socketProvider";
 import { useChatStore } from "@/store/useChatstore";
 import { useMemberStore } from "@/store/useMemberstore";
-import { Bot, Copy, CopyCheck, SidebarClose, SidebarOpen } from "lucide-react";
+import { Bot, SidebarClose, SidebarOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import EmojiPicker, { Theme } from "emoji-picker-react";
@@ -25,7 +25,7 @@ export default function ChatArea({
   const withBot = useRoomStore((s) => s.room?.withBot);
   const { sendMessage, typing, stopTyping } = useSocket();
   const currentUser = useMemberStore((s) => s.user);
-  const bottomRef = useRef(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const isBotMentioned = /(^|\s)@bot\b/i.test(inputValue) && withBot;
@@ -66,31 +66,6 @@ export default function ChatArea({
   return (
     <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col bg-[#050805]">
       {/* Terminal Header */}
-      {/* <div className="flex items-center gap-3 border-b border-emerald-900/40 bg-black px-5 py-3">
-        <span className="h-3 w-3 rounded-full bg-red-500" />
-        <span className="h-3 w-3 rounded-full bg-yellow-500" />
-        <span className="h-3 w-3 rounded-full bg-green-500" />
-
-        <span className="ml-3 font-mono text-sm text-emerald-500">
-          orbit-ai://terminal
-        </span>
-
-        <Mobile />
-
-        <div className="md:flex hidden">
-          {open ? (
-            <SidebarClose
-              onClick={() => setOpen(false)}
-              className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
-            />
-          ) : (
-            <SidebarOpen
-              onClick={() => setOpen(true)}
-              className="ml-auto h-4 w-4 cursor-pointer text-emerald-600 transition hover:text-emerald-400"
-            />
-          )}
-        </div>
-      </div> */}
 
       <div className="flex h-11 items-center border-b border-zinc-800 bg-black px-3 sm:px-4">
         {/* Terminal name */}

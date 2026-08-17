@@ -16,7 +16,7 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-const siteUrl = "https://orbit-ai.vercel.app"; // Replace with your domain
+const siteUrl = "https://orbit-ai.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

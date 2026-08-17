@@ -6,6 +6,7 @@ import { useChatStore } from "@/store/useChatstore";
 
 export const handleExpiry = () => {
   useRoomStore.getState().destroyRoom();
+  useMemberStore.getState().clearMember();
   useChatStore.getState().clearMessages();
 };
 
@@ -62,7 +63,7 @@ export function useRoomEmitter() {
           resolve();
         });
 
-        socket.once("room:failed", ({ err }) => {
+        socket.once("room:error", ({ err }) => {
           console.error("ROOM JOIN FAILED:", err);
 
           useRoomStore.getState().setError(err || "Room not found");

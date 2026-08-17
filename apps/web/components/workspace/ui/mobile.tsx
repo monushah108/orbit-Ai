@@ -8,7 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot, Users } from "lucide-react";
+import { Bot, Menu, Users } from "lucide-react";
 import { useMemberStore } from "@/store/useMemberstore";
 import { useRoomStore } from "@/store/useRoomstore";
 
@@ -33,7 +33,7 @@ export function Mobile() {
           "
           aria-label="Open members"
         >
-          <Users className="h-4 w-4" />
+          <Menu className="h-4 w-4" />
         </button>
       </SheetTrigger>
 

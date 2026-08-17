@@ -16,10 +16,26 @@ export default function RoomLeaveGuard() {
   const [showDialog, setShowDialog] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
+  // Prevent our own navigation from triggering the guard again
+  const [isLeaving, setIsLeaving] = useState(false);
+
   useEffect(() => {
     if (!room?.id) return;
 
     const handleClick = (event: MouseEvent) => {
+      if (isLeaving) return;
+
+      // Only normal left-click
+      if (
+        event.button !== 0 ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
       const target = event.target as HTMLElement;
       const link = target.closest("a");
 
@@ -29,28 +45,26 @@ export default function RoomLeaveGuard() {
 
       if (!href) return;
 
-      // Allow links inside the current room
-      if (href.startsWith(`/room/${room.id}`)) {
+      // Same room navigation is allowed
+      if (
+        href === `/workspace/${room.id}` ||
+        href.startsWith(`/workspace/${room.id}?`)
+      ) {
         return;
       }
 
-      // Allow external links
+      // External links are allowed to be handled normally
       if (
-        href.startsWith("http") ||
+        href.startsWith("http://") ||
+        href.startsWith("https://") ||
         href.startsWith("mailto:") ||
         href.startsWith("tel:")
       ) {
         return;
       }
 
-      // Let browser handle modifier-clicks
-      if (
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey ||
-        event.altKey ||
-        event.button !== 0
-      ) {
+      // Hash links on current page
+      if (href.startsWith("#")) {
         return;
       }
 
@@ -61,12 +75,72 @@ export default function RoomLeaveGuard() {
       setShowDialog(true);
     };
 
-    document.addEventListener("click", handleClick);
+    document.addEventListener("click", handleClick, true);
 
     return () => {
-      document.removeEventListener("click", handleClick);
+      document.removeEventListener("click", handleClick, true);
     };
-  }, [room?.id]);
+  }, [room?.id, isLeaving]);
+
+  /*
+   * Browser Back / Forward
+   */
+  useEffect(() => {
+    if (!room?.id || isLeaving) return;
+
+    // Add a history entry so we can catch Back
+    window.history.pushState(
+      {
+        orbitRoomGuard: true,
+        roomId: room.id,
+      },
+      "",
+      window.location.href,
+    );
+
+    const handlePopState = () => {
+      if (isLeaving) return;
+
+      // Put the user back into the workspace
+      window.history.pushState(
+        {
+          orbitRoomGuard: true,
+          roomId: room.id,
+        },
+        "",
+        window.location.href,
+      );
+
+      setPendingHref(null);
+      setShowDialog(true);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [room?.id, isLeaving]);
+
+  /*
+   * Refresh / Close tab
+   */
+  useEffect(() => {
+    if (!room?.id || isLeaving) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+
+      // Required for browsers to show the native dialog
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [room?.id, isLeaving]);
 
   const cancelLeave = () => {
     setShowDialog(false);
@@ -74,8 +148,13 @@ export default function RoomLeaveGuard() {
   };
 
   const confirmLeave = () => {
-    if (!room?.id || !pendingHref) return;
+    if (!room?.id) return;
 
+    setIsLeaving(true);
+
+    /*
+     * Cleanup room
+     */
     LeaveRoom(room.id);
 
     useRoomStore.getState().destroyRoom();
@@ -83,7 +162,14 @@ export default function RoomLeaveGuard() {
 
     setShowDialog(false);
 
-    router.push(pendingHref);
+    /*
+     * Navigate only after cleanup
+     */
+    if (pendingHref) {
+      router.push(pendingHref);
+    } else {
+      router.back();
+    }
 
     setPendingHref(null);
   };
@@ -93,46 +179,64 @@ export default function RoomLeaveGuard() {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 px-6 backdrop-blur-sm font-mono">
+      <div
+        className="w-full max-w-lg border border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
+        <div className="border-b border-zinc-800 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center border border-red-500/40 bg-red-500/10">
+                <AlertTriangle className="h-5 w-5 text-red-400" />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-semibold">Leave Room</h2>
+
+                <p className="text-sm text-zinc-500">
+                  This will disconnect you from the session.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={cancelLeave}
+              className="flex h-8 w-8 items-center justify-center border border-transparent text-zinc-500 transition hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-
-          <div className="flex-1">
-            <h2 className="text-base font-semibold text-white">
-              Leave this room?
-            </h2>
-
-            <p className="mt-1 text-sm leading-6 text-zinc-400">
-              Are you sure you want to leave this room? You will need to join
-              again to return.
-            </p>
-          </div>
-
-          <button
-            onClick={cancelLeave}
-            className="rounded-md p-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-white"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
-        {/* Actions */}
-        <div className="mt-6 flex justify-end gap-3">
+        {/* Body */}
+        <div className="space-y-3 px-6 py-5 text-sm text-zinc-400">
+          <p>Are you sure you want to leave this room?</p>
+
+          <p>
+            You will be disconnected from the current session and will need to
+            join the room again if you want to return.
+          </p>
+
+          <div className="border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-red-400">
+            Warning: Your current session will be terminated.
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 border-t border-zinc-800 p-6">
           <button
             onClick={cancelLeave}
-            className="rounded-md border border-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-zinc-900 hover:text-white"
+            className="h-10 flex-1 border border-zinc-800 bg-zinc-950 text-zinc-400 transition hover:bg-zinc-900 hover:text-zinc-100"
           >
-            Cancel
+            Stay in Room
           </button>
 
           <button
             onClick={confirmLeave}
-            className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-400"
+            className="h-10 flex-1 border border-red-500 bg-red-500/10 text-red-400 transition hover:bg-red-500/20"
           >
             Leave Room
           </button>

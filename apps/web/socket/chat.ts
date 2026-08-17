@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useChatStore } from "../store/useChatstore";
 import { Member, useMemberStore, User } from "../store/useMemberstore";
 import { socket } from "./socket";
-import { Room, useRoomStore } from "@/store/useRoomstore";
+import { useRoomStore } from "@/store/useRoomstore";
 
 export const handleTyping = ({
   event,
@@ -37,6 +37,7 @@ export const handleMembers = (members: Member[]) => {
 
 export const handleAiResponse = (res: string) => {
   useChatStore.getState().botMessage(res);
+  useChatStore.getState().setLoading(true);
 };
 
 export const useChatEmitter = () => {

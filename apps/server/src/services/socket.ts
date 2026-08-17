@@ -30,7 +30,10 @@ type UserSession = {
 
 class SocketService {
   private _io: Server;
-
+  private redisReady = false;
+  private redisErrorLogged = false;
+  private subscriberReady = false;
+  private subscriberErrorLogged = false;
   private redis: Redis;
   private redisSubscriber: Redis;
 
@@ -44,11 +47,49 @@ class SocketService {
         credentials: true,
       },
     });
-
     this.redis = new Redis(process.env.REDIS_URL!);
 
-    // Separate Redis connection is required for subscriptions.
     this.redisSubscriber = this.redis.duplicate();
+
+    this.redis.on("ready", () => {
+      this.redisReady = true;
+
+      if (this.redisErrorLogged) {
+        console.log("Redis connection restored");
+        this.redisErrorLogged = false;
+      }
+    });
+
+    this.redis.on("error", (error) => {
+      this.redisReady = false;
+
+      if (!this.redisErrorLogged) {
+        console.error("Redis connection lost:", error);
+        this.redisErrorLogged = true;
+
+        this.io.emit("server:error", {
+          message: "Server connection lost. Reconnecting...",
+        });
+      }
+    });
+
+    this.redisSubscriber.on("ready", () => {
+      this.subscriberReady = true;
+
+      if (this.subscriberErrorLogged) {
+        console.log("Redis subscriber connection restored");
+        this.subscriberErrorLogged = false;
+      }
+    });
+
+    this.redisSubscriber.on("error", (error) => {
+      this.subscriberReady = false;
+
+      if (!this.subscriberErrorLogged) {
+        console.error("Redis subscriber connection lost:", error);
+        this.subscriberErrorLogged = true;
+      }
+    });
 
     this.setupRedis();
   }
@@ -91,8 +132,9 @@ class SocketService {
     const io = this.io;
 
     // Socket.IO Redis adapter
-    const pubClient = new Redis(process.env.REDIS_URL!);
-    const subClient = pubClient.duplicate();
+
+    const pubClient = this.redis;
+    const subClient = this.redisSubscriber;
 
     io.adapter(createAdapter(pubClient, subClient));
 
@@ -100,53 +142,6 @@ class SocketService {
       // --------------------------------
       // CREATE ROOM
       // --------------------------------
-
-      // socket.on("room:create", async ({ roomId, user, duration, withBot }) => {
-      //   try {
-      //     const expiresIn = getDuration(duration);
-
-      //     const expiresAt = Date.now() + expiresIn;
-
-      //     const room: Room = {
-      //       roomId,
-      //       adminId: user.id,
-      //       members: [user],
-      //       duration,
-      //       expiresAt,
-      //       withBot,
-      //     };
-
-      //     // Store room in Redis
-      //     await this.redis.set(
-      //       `orbit:room:${roomId}`,
-      //       JSON.stringify(room),
-      //       "PX",
-      //       expiresIn,
-      //     );
-
-      //     // Store socket -> user session locally
-      //     this.users.set(socket.id, {
-      //       user,
-      //       roomId,
-      //     });
-
-      //     socket.join(roomId);
-
-      //     io.to(roomId).emit("members", room.members);
-
-      //     io.to(roomId).emit("room:created", {
-      //       expiresAt,
-      //     });
-
-      //     console.log(`Room created: ${roomId}`);
-      //   } catch (error) {
-      //     console.error("Room creation error:", error);
-
-      //     socket.emit("room:failed", {
-      //       err: "Failed to create room",
-      //     });
-      //   }
-      // });
 
       socket.on("room:create", async ({ roomId, user, duration, withBot }) => {
         const existingSession = this.users.get(socket.id);
@@ -159,6 +154,7 @@ class SocketService {
 
           return;
         }
+
         try {
           const expiresIn = getDuration(duration);
           const expiresAt = Date.now() + expiresIn;
@@ -188,12 +184,8 @@ class SocketService {
           io.to(roomId).emit("room:created", {
             expiresAt,
           });
-
-          console.log(`Room created: ${roomId}`);
         } catch (error) {
-          console.error("Room creation error:", error);
-
-          socket.emit("room:failed", {
+          socket.emit("room:error", {
             err: "Failed to create room",
           });
         }
@@ -204,8 +196,6 @@ class SocketService {
       // --------------------------------
 
       socket.on("room:join", async ({ roomId, user }) => {
-        console.log("JOIN REQUEST:", roomId, user);
-
         const existingSession = this.users.get(socket.id);
 
         if (existingSession?.roomId) {
@@ -234,7 +224,7 @@ class SocketService {
         if (Date.now() >= room.expiresAt) {
           await this.redis.del(key);
 
-          socket.emit("room:failed", {
+          socket.emit("room:error", {
             err: "Room has already expired",
           });
 
@@ -269,8 +259,6 @@ class SocketService {
 
         // Tell ONLY the joining socket
         socket.emit("room:joined", room);
-
-        console.log(`${user.name} joined ${roomId}`);
       });
 
       // --------------------------------
@@ -296,10 +284,10 @@ class SocketService {
           }
 
           io.to(roomId).emit("room:expired");
-
-          console.log(`Room destroyed: ${roomId}`);
         } catch (error) {
-          console.error("Destroy room error:", error);
+          socket.emit("room:error", {
+            err: "failed to destory room",
+          });
         }
       });
 
@@ -310,6 +298,7 @@ class SocketService {
         const exists = await this.redis.exists(`orbit:room:${roomId}`);
 
         if (!exists) {
+          this.users.delete(socket.id);
           io.to(roomId).emit("room:expired");
           return;
         }
@@ -357,7 +346,9 @@ class SocketService {
             await this.redis.del(key);
           }
         } catch (error) {
-          console.error("Leave room error:", error);
+          socket.emit("room:error", {
+            err: "something went wrong !!",
+          });
         }
       });
       // --------------------------------
@@ -427,11 +418,11 @@ ${message}
 
           io.to(roomId).emit("ai:done");
         } catch (error) {
-          console.error("AI error:", error);
-
           io.to(roomId).emit("ai:error", {
             message: "Something went wrong while generating the response.",
           });
+        } finally {
+          io.to(roomId).emit("ai:loading", false);
         }
       });
 

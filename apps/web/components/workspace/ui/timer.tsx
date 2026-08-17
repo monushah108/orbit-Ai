@@ -52,6 +52,7 @@ export default function Timer({
     // Ask server when the timer reaches zero
     const remaining = Math.max(0, expiresAt - Date.now());
     const timeout = setTimeout(() => {
+      console.log("check", remaining);
       checkRoomExists(roomId);
     }, remaining);
 
