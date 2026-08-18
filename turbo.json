@@ -15,6 +15,9 @@
         ".next/**",
         "!.next/cache/**",
         "!.next/dev/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_SOCKET_URL"
       ]
     },
     "lint": {
@@ -31,7 +34,7 @@
       "cache": false,
       "persistent": true,
       "env": [
-        "SOCKET_URL"
+        "NEXT_PUBLIC_SOCKET_URL"
       ]
     }
   }
