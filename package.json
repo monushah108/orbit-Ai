@@ -1,6 +1,7 @@
 {
   "name": "with-tailwind",
   "private": true,
+  "packageManager": "npm@10.9.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

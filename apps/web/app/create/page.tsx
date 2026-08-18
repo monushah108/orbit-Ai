@@ -1,5 +1,5 @@
 import Footer from "@/components/home/footer";
-import { Navbar } from "@/components/home/navbar";
+import Navbar from "@/components/home/navbar";
 import RoomTerminal from "@/components/form/roomTerminal";
 
 export default function Page() {
