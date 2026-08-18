@@ -76,6 +76,16 @@ Users can join the same room and chat together while also interacting with **Orb
   />
 </p>
 
+### video preview
+
+<a href="https://youtu.be/13bv-vhB1Uo?si=_JLYoRdf7xUqJC4M">
+<img
+    src="https://i.ytimg.com/vi/13bv-vhB1Uo/maxresdefault.jpg"
+    alt="Orbit AI Demo"
+    width="700"
+  />
+ <div>Watch Orbit AI Demo</div>
+</a>
 ---
 
 ## ✨ Features
