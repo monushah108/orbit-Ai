@@ -34,6 +34,50 @@ Users can join the same room and chat together while also interacting with **Orb
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Create Temporary AI Workspace
+
+<p align="center">
+  <img
+    src="./apps/web/public/home-preview.png"
+    alt="Orbit AI Create Workspace"
+    width="700"
+  />
+</p>
+
+### 💬 AI-Powered Room Chat
+
+<p align="center">
+  <img
+    src="./apps/web/public/mobile-1.png"
+    alt="Orbit AI Chat"
+    width="350"
+  />
+</p>
+
+### 👥 Members & AI Assistant
+
+<p align="center">
+  <img
+    src="./apps/web/public/mobile-2.png"
+    alt="Orbit AI Members"
+    width="350"
+  />
+</p>
+
+### 🖥️ Real-Time Collaborative Workspace
+
+<p align="center">
+  <img
+    src="./apps/web/public/channels.png"
+    alt="Orbit AI Collaborative Workspace"
+    width="800"
+  />
+</p>
+
+---
+
 ## ✨ Features
 
 - 🤖 **AI Chat**
