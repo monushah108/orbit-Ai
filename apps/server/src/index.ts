@@ -1,9 +1,9 @@
 import "dotenv/config";
 import http from "http";
 import SocketService from "./services/socket";
+import { Server } from "socket.io";
 
 function init() {
-  const socketService = new SocketService();
   const httpServer = http.createServer((req, res) => {
     if (req.url === "/health" && req.method === "GET") {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -23,7 +23,15 @@ function init() {
 
   const PORT = Number(process.env.PORT) || 8000;
 
-  socketService.io.attach(httpServer);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: process.env.CLIENT_URL,
+      credentials: true,
+    },
+  });
+
+  const socketService = new SocketService(io);
+
   socketService.initListeners();
 
   httpServer.listen(PORT, "0.0.0.0", () => {

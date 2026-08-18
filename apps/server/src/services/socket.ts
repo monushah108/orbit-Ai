@@ -40,13 +40,8 @@ class SocketService {
   // Socket connection -> user information
   private users = new Map<string, UserSession>();
 
-  constructor() {
-    this._io = new Server({
-      cors: {
-        origin: process.env.CLIENT_URL,
-        credentials: true,
-      },
-    });
+  constructor(io: Server) {
+    this._io = io;
     this.redis = new Redis(process.env.REDIS_URL!);
 
     this.redisSubscriber = this.redis.duplicate();
