@@ -4,16 +4,31 @@ import SocketService from "./services/socket";
 
 function init() {
   const socketService = new SocketService();
-  const httpServer = http.createServer();
+  const httpServer = http.createServer((req, res) => {
+    if (req.url === "/health" && req.method === "GET") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          socket: "running",
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      return;
+    }
 
-  const PORT = process.env.PORT ?? 8000;
+    res.writeHead(404);
+    res.end();
+  });
+
+  const PORT = Number(process.env.PORT) || 8000;
 
   socketService.io.attach(httpServer);
   socketService.initListeners();
 
-  httpServer.listen(PORT, () => console.log("http server at port:8000"));
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`HTTP + Socket.IO server running on port ${PORT}`);
+  });
 }
 
 init();
-
-// TODO implement redis for creating user and room with ttl per rooms and for destory rooms
