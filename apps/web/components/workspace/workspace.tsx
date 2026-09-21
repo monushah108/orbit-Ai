@@ -31,10 +31,10 @@ export default function Workspace() {
   }
 
   return (
-    <main className="h-screen overflow-hidden bg-black text-white">
+    <main className="flex h-screen h-[100dvh] flex-col overflow-hidden bg-black text-white">
       <Header />
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
         <ChatArea open={open} setOpen={setOpen} />
         <MemberList open={open} setOpen={setOpen} />
       </div>

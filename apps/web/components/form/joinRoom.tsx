@@ -41,9 +41,9 @@ export default function JoinRoom() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 p-8 font-mono">
+    <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 p-4 sm:p-6 md:p-8 font-mono">
       <div>
-        <p className="mb-2 text-emerald-400">&gt; room_access_id</p>
+        <p className="mb-2 text-xs sm:text-sm text-emerald-400">&gt; room_access_id</p>
 
         <div className="relative">
           <input
@@ -51,17 +51,24 @@ export default function JoinRoom() {
             onChange={(e) => setRoomId(e.target.value)}
             placeholder="Enter room ID..."
             className="
-        w-full
-        border-b
-        border-zinc-700
-        bg-transparent
-        pb-3
-        pr-10
-        text-white
-        outline-none
-        placeholder:text-zinc-600
-        focus:border-emerald-500
-      "
+              w-full
+              border-b
+              border-zinc-700
+              bg-transparent
+              pb-2.5
+              sm:pb-3
+              pr-10
+              font-mono
+              text-xs
+              sm:text-sm
+              md:text-base
+              text-white
+              outline-none
+              placeholder:text-zinc-600
+              placeholder:text-xs
+              sm:placeholder:text-sm
+              focus:border-emerald-500
+            "
           />
 
           {roomId && (
@@ -69,32 +76,32 @@ export default function JoinRoom() {
               type="button"
               onClick={() => setRoomId("")}
               className="
-          absolute
-          right-0
-          top-1/2
-          -translate-y-1/2
-          rounded-md
-          p-1
-          text-zinc-500
-          transition
-          hover:bg-zinc-800
-          hover:text-white
-        "
+                absolute
+                right-0
+                top-1/2
+                -translate-y-1/2
+                rounded-md
+                p-1
+                text-zinc-500
+                transition
+                hover:bg-zinc-800
+                hover:text-white
+              "
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
 
-        <p className="mt-2 text-xs text-zinc-500">
+        <p className="mt-2 text-[11px] sm:text-xs text-zinc-500">
           Paste the room ID shared by the room creator.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-black p-5">
-        <p className="mb-3 text-zinc-500">CONNECTION STATUS</p>
+      <div className="rounded-lg border border-zinc-800 bg-black p-4 sm:p-5">
+        <p className="mb-2 sm:mb-3 text-xs sm:text-sm text-zinc-500">CONNECTION STATUS</p>
 
-        <div className="space-y-2 text-sm text-emerald-400">
+        <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-emerald-400">
           <p>✓ Waiting for room ID</p>
           <p>✓ Secure tunnel ready</p>
           <p>✓ AI runtime available</p>
@@ -104,21 +111,23 @@ export default function JoinRoom() {
       <Button
         disabled={!roomId.trim() || loading}
         className={`
-    h-14
-    w-full
-    rounded-lg
-    border
-    font-mono
-    text-base
-    font-semibold
-    transition-all
+          h-12
+          sm:h-14
+          w-full
+          rounded-lg
+          border
+          font-mono
+          text-sm
+          sm:text-base
+          font-semibold
+          transition-all
 
-    ${
-      roomId.trim()
-        ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black"
-        : "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
-    }
-  `}
+          ${
+            roomId.trim() && !loading
+              ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black cursor-pointer"
+              : "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
+          }
+        `}
       >
         {loading ? "CONNECTING..." : "JOIN ORBIT →"}
       </Button>

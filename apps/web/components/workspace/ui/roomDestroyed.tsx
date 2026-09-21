@@ -29,54 +29,54 @@ export default function RoomDestroyed() {
   return (
     <div className="flex h-screen flex-col bg-black font-mono text-zinc-100">
       {/* Header */}
-      <header className="h-14 border-b border-zinc-800 px-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center border border-emerald-500 bg-emerald-500/10">
+      <header className="h-14 border-b border-zinc-800 px-3.5 sm:px-5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded border border-emerald-500 bg-emerald-500/10">
             <Zap className="h-4 w-4 text-emerald-400" />
           </div>
 
-          <span className="tracking-wide">Orbit AI</span>
+          <span className="font-mono text-sm sm:text-base tracking-wide text-white">Orbit AI</span>
         </div>
 
-        <span className="text-xs uppercase tracking-[0.2em] text-red-400">
+        <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-red-400">
           Session Terminated
         </span>
       </header>
 
       {/* Body */}
-      <main className="flex flex-1 items-center justify-center px-6">
-        <div className="w-full max-w-lg border border-zinc-800 bg-zinc-950">
-          <div className="border-b border-zinc-800 px-6 py-4">
+      <main className="flex flex-1 items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl">
+          <div className="border-b border-zinc-800 p-4 sm:px-6 sm:py-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center border border-red-500/40 bg-red-500/10">
+              <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10">
                 <Trash2 className="h-5 w-5 text-red-400" />
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold">Room Destroyed</h2>
-                <p className="text-sm text-zinc-500">
+                <h2 className="text-base sm:text-lg font-semibold text-white">Room Destroyed</h2>
+                <p className="text-xs sm:text-sm text-zinc-500">
                   This session is no longer available.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3 px-6 py-5 text-sm text-zinc-400">
+          <div className="space-y-3 p-4 sm:px-6 sm:py-5 text-xs sm:text-sm text-zinc-400">
             <p>The room has been permanently destroyed by its owner.</p>
 
             <p>
               All participants have been disconnected and can no longer rejoin
               using this room ID.
             </p>
-            <p className="text-sm text-zinc-500">Redirecting in {count}...</p>
+            <p className="text-xs sm:text-sm text-emerald-400 font-mono">Redirecting in {count}s...</p>
           </div>
 
-          <div className="border-t border-zinc-800 p-6">
+          <div className="border-t border-zinc-800 p-4 sm:p-6">
             <button
               onClick={onCreateRoom}
-              className="h-10 w-full border border-emerald-500 bg-emerald-500/10 text-emerald-400 transition hover:bg-emerald-500/20"
+              className="h-11 w-full rounded-lg border border-emerald-500 bg-emerald-500/10 font-mono text-xs sm:text-sm text-emerald-400 transition hover:bg-emerald-500 hover:text-black cursor-pointer"
             >
-              Create New Room
+              Create New Room →
             </button>
           </div>
         </div>

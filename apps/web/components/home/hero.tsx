@@ -12,13 +12,13 @@ export default function Hero() {
 
       <div className="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
 
-      <div className="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-12 text-center md:py-16">
+      <div className="relative mx-auto flex max-w-5xl flex-col items-center px-4 py-10 text-center sm:px-6 sm:py-14 md:py-20">
         {/* Status */}
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="mb-5 flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-2 font-mono text-xs text-zinc-400"
+          className="mb-4 sm:mb-5 flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-3.5 py-1.5 sm:px-4 sm:py-2 font-mono text-[11px] sm:text-xs text-zinc-400"
         >
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           READY TO CREATE ROOM
@@ -29,7 +29,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.6 }}
-          className="max-w-4xl font-mono text-4xl font-bold leading-tight text-white md:text-6xl"
+          className="max-w-4xl font-mono text-3xl font-bold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl"
         >
           Create Temporary
           <br />
@@ -51,7 +51,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="mt-5 max-w-2xl font-mono text-sm leading-7 text-zinc-500 md:text-base"
+          className="mt-4 sm:mt-5 max-w-2xl font-mono text-xs sm:text-sm leading-6 sm:leading-7 text-zinc-400 md:text-base"
         >
           Generate a secure room ID, choose how long your workspace should stay
           alive, and collaborate instantly. No sign-up required.
@@ -62,21 +62,21 @@ export default function Hero() {
           initial={{ opacity: 0, y: 35 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.7 }}
-          className="mt-10 w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-800 bg-[#090909]"
+          className="mt-8 sm:mt-10 w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-800 bg-[#090909]"
         >
           {/* Header */}
-          <div className="flex items-center gap-2 border-b border-zinc-800 px-4 py-3">
-            <span className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="h-3 w-3 rounded-full bg-yellow-500" />
-            <span className="h-3 w-3 rounded-full bg-green-500" />
+          <div className="flex items-center gap-2 border-b border-zinc-800 px-3.5 py-2.5 sm:px-4 sm:py-3">
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-red-500" />
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-yellow-500" />
+            <span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-green-500" />
 
-            <span className="ml-3 font-mono text-xs text-zinc-500">
+            <span className="ml-2 sm:ml-3 font-mono text-[11px] sm:text-xs text-zinc-500">
               orbit-terminal
             </span>
           </div>
 
           {/* Output */}
-          <div className="space-y-2 p-5 text-left font-mono text-sm">
+          <div className="overflow-x-auto space-y-1.5 sm:space-y-2 p-3.5 sm:p-5 text-left font-mono text-xs sm:text-sm">
             <p className="text-emerald-400">$ orbit create-room</p>
 
             <p className="text-zinc-500">Initializing temporary workspace...</p>
@@ -101,19 +101,22 @@ export default function Hero() {
             </div>
           </div>
         </motion.div>
+
         {/* Hero Actions */}
-        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
+        <div className="mt-8 sm:mt-10 flex w-full max-w-sm flex-col items-stretch gap-3 sm:max-w-none sm:w-auto sm:flex-row sm:items-center sm:gap-4">
           <Button
+            asChild
             size="lg"
-            className="h-12 rounded border border-emerald-500 bg-emerald-500/10 px-8 font-mono text-emerald-400 hover:bg-emerald-500 hover:text-black"
+            className="h-11 sm:h-12 w-full sm:w-auto rounded border border-emerald-500 bg-emerald-500/10 px-6 sm:px-8 font-mono text-sm sm:text-base text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all"
           >
             <Link href="/create">&gt; CREATE ROOM</Link>
           </Button>
 
           <Button
+            asChild
             variant="ghost"
             size="lg"
-            className="font-mono text-zinc-400 hover:text-white"
+            className="h-11 sm:h-12 w-full sm:w-auto font-mono text-sm sm:text-base text-zinc-400 hover:text-white transition-all"
           >
             <Link href="#features">View Features ↓</Link>
           </Button>

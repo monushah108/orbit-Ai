@@ -63,9 +63,9 @@ export default function Timer({
   }, [expiresAt, roomId, checkRoomExists]);
 
   return (
-    <div className=" items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1.5 font-mono text-xs text-zinc-400 flex">
-      <Clock className="h-4 w-4 text-emerald-400" />
-      <span className="text-emerald-400">{timeLeft}</span>
+    <div className="flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/90 px-2 py-1 sm:px-3 sm:py-1.5 font-mono text-[11px] sm:text-xs text-zinc-400">
+      <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 shrink-0" />
+      <span className="text-emerald-400 font-medium">{timeLeft}</span>
     </div>
   );
 }

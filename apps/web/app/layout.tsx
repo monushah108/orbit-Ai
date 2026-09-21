@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -101,6 +101,13 @@ export const metadata: Metadata = {
   category: "technology",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#000000",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -112,7 +119,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn("dark", geist.variable, mono.variable)}
     >
-      <body className="bg-background font-sans antialiased">
+      <body className="min-h-screen bg-background font-sans antialiased overflow-x-hidden">
         <SocketProvider>{children}</SocketProvider>
         <Toaster
           position="top-center"

@@ -52,7 +52,7 @@ export default function RoomTerminal() {
   };
 
   return (
-    <section className="flex min-h-screen w-full items-center justify-center bg-[#020402] px-3 py-4 sm:px-6 sm:py-8">
+    <section className="flex min-h-[calc(100dvh-4rem)] w-full items-center justify-center bg-[#020402] px-3 py-6 sm:px-6 sm:py-10">
       <div
         className="
           flex
@@ -167,7 +167,8 @@ export default function RoomTerminal() {
                       className="
                         min-w-0
                         w-full
-                        max-w-60
+                        max-w-full
+                        sm:max-w-60
                         border-b
                         border-emerald-500
                         bg-transparent
@@ -210,7 +211,7 @@ export default function RoomTerminal() {
         )}
 
         {/* Forms */}
-        <div className="min-w-0 px-3 pb-4 sm:px-4 sm:pb-5">
+        <div className="min-w-0">
           {mode === "create" ? <CreateRoom /> : <JoinRoom />}
         </div>
       </div>

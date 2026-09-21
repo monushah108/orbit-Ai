@@ -46,22 +46,22 @@ export default function Header() {
         h-14
         w-full
         items-center
+        justify-between
         border-b
         border-zinc-800
         bg-zinc-950
-        px-3
+        px-2.5
         sm:px-4
       "
     >
       {/* ================= LEFT ================= */}
 
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <div
           className="
             flex
             h-7
             w-7
-            shrink-0
             items-center
             justify-center
             rounded-md
@@ -93,18 +93,16 @@ export default function Header() {
       {showTimer && (
         <div
           className="
-            absolute
-            left-1/2
-            top-1/2
             flex
-            -translate-x-1/2
-            -translate-y-1/2
+            shrink
             items-center
             justify-center
             font-mono
-            text-xs
-            text-zinc-300
-            sm:text-sm
+            md:absolute
+            md:left-1/2
+            md:top-1/2
+            md:-translate-x-1/2
+            md:-translate-y-1/2
           "
         >
           <Timer expiresAt={expiresAt} roomId={room.id} />
@@ -115,12 +113,11 @@ export default function Header() {
 
       <div
         className="
-          ml-auto
           flex
           shrink-0
           items-center
-          gap-2
-          sm:gap-3
+          gap-1.5
+          sm:gap-2.5
         "
       >
         {/* Room ID */}
@@ -129,19 +126,21 @@ export default function Header() {
           onClick={copyRoomId}
           className="
             flex
-            max-w-[70px]
+            max-w-[76px]
             items-center
-            gap-1.5
-            truncate
+            gap-1
             rounded-md
+            border
+            border-zinc-800/80
+            bg-zinc-900/40
             px-1.5
             py-1
             font-mono
-            text-[10px]
-            text-zinc-500
+            text-[11px]
+            text-zinc-400
             transition
-            hover:bg-zinc-900
-            hover:text-zinc-200
+            hover:bg-zinc-800
+            hover:text-zinc-100
             sm:max-w-none
             sm:px-2
             sm:text-xs
@@ -191,8 +190,8 @@ export default function Header() {
             onClick={destroyRoom}
             className="
               flex
-              h-8
-              w-8
+              h-7
+              w-7
               shrink-0
               items-center
               justify-center
@@ -203,16 +202,16 @@ export default function Header() {
               hover:text-red-300
               sm:h-auto
               sm:w-auto
-              sm:gap-2
+              sm:gap-1.5
               sm:px-2
-              sm:py-1.5
+              sm:py-1
             "
             aria-label="Destroy room"
             title="Destroy room"
           >
-            <Bomb className="h-4 w-4" />
+            <Bomb className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
 
-            <span className="hidden text-sm sm:block">Destroy</span>
+            <span className="hidden text-xs sm:block sm:text-sm">Destroy</span>
           </button>
         )}
 
@@ -223,16 +222,22 @@ export default function Header() {
             flex
             shrink-0
             items-center
-            gap-1.5
+            gap-1
             rounded-md
-            px-1
-            text-xs
+            border
+            border-zinc-800/80
+            bg-zinc-900/40
+            px-1.5
+            py-1
+            text-[11px]
             text-zinc-400
+            sm:gap-1.5
             sm:px-2
-            sm:text-sm
+            sm:text-xs
           "
+          title={`${members.length} members online`}
         >
-          <Users className="h-4 w-4" />
+          <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400" />
 
           <span>{members.length}</span>
         </div>

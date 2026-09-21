@@ -55,8 +55,8 @@ export default function Bubble({ isBot, item, isMe }: Bubbleprop) {
 
             {/* Actual streamed message */}
             {item.message && !error && (
-              <div className="border-l-2 border-cyan-500/70 pl-4">
-                <p className="whitespace-pre-wrap leading-7 text-zinc-200">
+              <div className="border-l-2 border-cyan-500/70 pl-3 sm:pl-4 min-w-0">
+                <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-xs sm:text-sm leading-6 sm:leading-7 text-zinc-200">
                   {item.message}
                 </p>
               </div>
@@ -126,13 +126,13 @@ export default function Bubble({ isBot, item, isMe }: Bubbleprop) {
 
           {/* Message */}
           <div
-            className={`rounded-lg border px-4 py-3 transition-all ${
+            className={`rounded-lg border px-3 sm:px-4 py-2.5 sm:py-3 transition-all min-w-0 ${
               isMe
                 ? "border-zinc-800 bg-black/40"
                 : "border-emerald-900/50 bg-emerald-500/5 shadow-[0_0_30px_rgba(16,185,129,0.08)]"
             }`}
           >
-            <p className="whitespace-pre-wrap leading-7 text-zinc-300">
+            <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-xs sm:text-sm leading-6 sm:leading-7 text-zinc-300">
               {item.message}
             </p>
           </div>

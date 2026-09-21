@@ -18,18 +18,22 @@ export default function MemberList({
 
   return (
     <aside
-      className={` md:flex hidden
-  border-r
-  border-emerald-900/40
-  bg-[#030603]
-  transition-all
-  duration-300
-  ${open ? "w-full max-w-[320px] sm:w-72 lg:w-80" : "w-0 overflow-hidden border-none"}
-`}
+      className={`
+        hidden
+        md:flex
+        flex-col
+        h-full
+        border-l
+        border-emerald-900/40
+        bg-[#030603]
+        transition-all
+        duration-300
+        ${open ? "w-64 lg:w-72 xl:w-80" : "w-0 overflow-hidden border-none"}
+      `}
     >
       {/* Content */}
       {open && (
-        <div className="p-5 ">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {/* Header */}
           <div className="mb-6 flex items-center gap-2">
             <Users className="h-4 w-4 text-emerald-400" />

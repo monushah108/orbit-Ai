@@ -179,23 +179,23 @@ export default function RoomLeaveGuard() {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 px-6 backdrop-blur-sm font-mono">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 sm:p-6 backdrop-blur-sm font-mono">
       <div
-        className="w-full max-w-lg border border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl"
+        className="w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="border-b border-zinc-800 px-6 py-4">
+        <div className="border-b border-zinc-800 p-4 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center border border-red-500/40 bg-red-500/10">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold">Leave Room</h2>
+                <h2 className="text-base sm:text-lg font-semibold">Leave Room</h2>
 
-                <p className="text-sm text-zinc-500">
+                <p className="text-xs sm:text-sm text-zinc-500">
                   This will disconnect you from the session.
                 </p>
               </div>
@@ -203,7 +203,7 @@ export default function RoomLeaveGuard() {
 
             <button
               onClick={cancelLeave}
-              className="flex h-8 w-8 items-center justify-center border border-transparent text-zinc-500 transition hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-transparent text-zinc-500 transition hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -212,7 +212,7 @@ export default function RoomLeaveGuard() {
         </div>
 
         {/* Body */}
-        <div className="space-y-3 px-6 py-5 text-sm text-zinc-400">
+        <div className="space-y-3 p-4 sm:px-6 sm:py-5 text-xs sm:text-sm text-zinc-400">
           <p>Are you sure you want to leave this room?</p>
 
           <p>
@@ -220,23 +220,23 @@ export default function RoomLeaveGuard() {
             join the room again if you want to return.
           </p>
 
-          <div className="border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-red-400">
+          <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-xs text-red-400">
             Warning: Your current session will be terminated.
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-zinc-800 p-6">
+        <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 border-t border-zinc-800 p-4 sm:p-6">
           <button
             onClick={cancelLeave}
-            className="h-10 flex-1 border border-zinc-800 bg-zinc-950 text-zinc-400 transition hover:bg-zinc-900 hover:text-zinc-100"
+            className="h-10 w-full sm:flex-1 rounded-lg border border-zinc-800 bg-zinc-950 font-mono text-xs sm:text-sm text-zinc-400 transition hover:bg-zinc-900 hover:text-zinc-100 cursor-pointer"
           >
             Stay in Room
           </button>
 
           <button
             onClick={confirmLeave}
-            className="h-10 flex-1 border border-red-500 bg-red-500/10 text-red-400 transition hover:bg-red-500/20"
+            className="h-10 w-full sm:flex-1 rounded-lg border border-red-500 bg-red-500/10 font-mono text-xs sm:text-sm text-red-400 transition hover:bg-red-500/20 cursor-pointer"
           >
             Leave Room
           </button>

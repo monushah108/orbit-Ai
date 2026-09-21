@@ -2,13 +2,14 @@
 
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot, Menu, Users } from "lucide-react";
+import { Bot, Menu, Users, X } from "lucide-react";
 import { useMemberStore } from "@/store/useMemberstore";
 import { useRoomStore } from "@/store/useRoomstore";
 
@@ -24,7 +25,7 @@ export function Mobile() {
         <button
           type="button"
           className="
-            flex h-9 w-9 items-center justify-center
+            flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center
             rounded-md
             text-zinc-500
             transition
@@ -39,7 +40,6 @@ export function Mobile() {
 
       <SheetContent
         side="right"
-
         className="
           w-[88%]
           max-w-sm
@@ -50,7 +50,7 @@ export function Mobile() {
         "
       >
         {/* Header */}
-        <SheetHeader className="border-b border-zinc-800 px-5 py-4">
+        <SheetHeader className="border-b border-zinc-800 px-4 py-3 sm:px-5 sm:py-4">
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-emerald-400" />
@@ -60,9 +60,21 @@ export function Mobile() {
               </span>
             </div>
 
-            <span className="rounded-md border border-zinc-800 bg-zinc-900/50 px-2 py-1 font-mono text-[10px] text-zinc-500">
-              {members.length + (withBot ? 1 : 0)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-md border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 font-mono text-[10px] text-zinc-500">
+                {members.length + (withBot ? 1 : 0)}
+              </span>
+
+              <SheetClose asChild>
+                <button
+                  type="button"
+                  className="rounded-md p-1 text-zinc-500 hover:bg-zinc-800 hover:text-white transition"
+                  aria-label="Close members drawer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </SheetClose>
+            </div>
           </SheetTitle>
         </SheetHeader>
 
