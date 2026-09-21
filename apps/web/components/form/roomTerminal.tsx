@@ -6,7 +6,7 @@ import JoinRoom from "./joinRoom";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import getUser from "@/lib/randomUser";
 import { useMemberStore } from "@/store/useMemberstore";
-import { Pencil } from "lucide-react";
+import { Check, LogIn, Pencil, Plus } from "lucide-react";
 
 export default function RoomTerminal() {
   const [mode, setMode] = useState<"create" | "join">("create");
@@ -52,102 +52,117 @@ export default function RoomTerminal() {
   };
 
   return (
-    <section className="flex min-h-[calc(100dvh-4rem)] w-full items-center justify-center bg-[#020402] px-3 py-6 sm:px-6 sm:py-10">
-      <div
-        className="
-          flex
-          w-full
-          max-w-xl
-          flex-col
-          overflow-hidden
-          rounded-xl
-          border border-emerald-900/40
-          bg-[#050805]
-          shadow-[0_0_60px_rgba(16,185,129,0.05)]
-        "
-      >
-        {/* Terminal Header */}
-        <div className="flex h-12 items-center border-b border-emerald-900/40 bg-black px-3 sm:px-5">
+    <div
+      className="
+        flex
+        w-full
+        max-w-md
+        sm:max-w-lg
+        md:max-w-xl
+        flex-col
+        overflow-hidden
+        rounded-2xl
+        border border-emerald-500/20
+        bg-[#050805]/95
+        backdrop-blur-xl
+        shadow-[0_0_50px_rgba(16,185,129,0.08)]
+        transition-all
+      "
+    >
+      {/* Terminal Header */}
+      <div className="flex h-11 items-center justify-between border-b border-emerald-900/40 bg-black/80 px-3 sm:px-4">
+        <div className="flex items-center gap-2">
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-red-500 sm:h-3 sm:w-3" />
-            <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 sm:h-3 sm:w-3" />
-            <span className="h-2.5 w-2.5 rounded-full bg-green-500 sm:h-3 sm:w-3" />
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500/90 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/90 shadow-[0_0_6px_rgba(234,179,8,0.5)]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-green-500/90 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
           </div>
 
-          <span className="ml-3 truncate font-mono text-xs text-zinc-500 sm:ml-4 sm:text-sm">
-            orbit-terminal
+          <span className="ml-2 truncate font-mono text-xs text-zinc-400">
+            orbit-terminal // session-init
           </span>
         </div>
 
-        {/* Toggle */}
-        <div className="border-b border-zinc-800 p-3 sm:p-4">
-          <div className="grid grid-cols-2 gap-1 rounded-lg border border-zinc-800 bg-black p-1">
-            <button
-              type="button"
-              onClick={() => setMode("create")}
-              className={`
-                min-h-10
-                rounded-md
-                px-2
-                py-2
-                font-mono
-                text-xs
-                transition
-                sm:text-sm
-                ${
-                  mode === "create"
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-                }
-              `}
-            >
-              Create Room
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMode("join")}
-              className={`
-                min-h-10
-                rounded-md
-                px-2
-                py-2
-                font-mono
-                text-xs
-                transition
-                sm:text-sm
-                ${
-                  mode === "join"
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-                }
-              `}
-            >
-              Join Room
-            </button>
-          </div>
+        <div className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="hidden sm:inline">ONLINE</span>
         </div>
+      </div>
 
-        {/* Identity */}
-        {user && (
-          <div className="mx-3 my-3 rounded-lg border border-emerald-900/50 bg-black/40 p-3 sm:mx-4 sm:my-4 sm:p-4">
-            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-              {/* Avatar */}
-              <Avatar className="h-10 w-10 shrink-0 sm:h-12 sm:w-12">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="bg-emerald-500/10 font-mono text-emerald-400">
-                  OR
-                </AvatarFallback>
-              </Avatar>
+      {/* Toggle */}
+      <div className="border-b border-zinc-800/80 p-2.5 sm:p-3 bg-black/40">
+        <div className="grid grid-cols-2 gap-1 rounded-lg border border-zinc-800/80 bg-black p-1">
+          <button
+            type="button"
+            onClick={() => setMode("create")}
+            className={`
+              flex items-center justify-center gap-1.5
+              h-9
+              rounded-md
+              px-2
+              font-mono
+              text-xs
+              sm:text-sm
+              font-medium
+              transition-all
+              ${
+                mode === "create"
+                  ? "bg-emerald-500/15 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] border border-emerald-500/30"
+                  : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300 border border-transparent"
+              }
+            `}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create Room
+          </button>
 
-              {/* Identity info */}
-              <div className="min-w-0 flex-1">
-                <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-zinc-600 sm:text-xs">
-                  Identity
-                </p>
+          <button
+            type="button"
+            onClick={() => setMode("join")}
+            className={`
+              flex items-center justify-center gap-1.5
+              h-9
+              rounded-md
+              px-2
+              font-mono
+              text-xs
+              sm:text-sm
+              font-medium
+              transition-all
+              ${
+                mode === "join"
+                  ? "bg-emerald-500/15 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] border border-emerald-500/30"
+                  : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300 border border-transparent"
+              }
+            `}
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            Join Room
+          </button>
+        </div>
+      </div>
 
-                <div className="flex min-w-0 items-center gap-2">
-                  {editing ? (
+      {/* Identity */}
+      {user && (
+        <div className="mx-3 my-2.5 sm:mx-4 sm:my-3 rounded-lg border border-emerald-900/40 bg-black/40 p-2.5 sm:p-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {/* Avatar */}
+            <Avatar className="h-9 w-9 shrink-0 sm:h-10 sm:w-10 ring-1 ring-emerald-500/30">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="bg-emerald-500/10 font-mono text-emerald-400 text-xs">
+                OR
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Identity info */}
+            <div className="min-w-0 flex-1">
+              <p className="mb-0.5 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                Identity Profile
+              </p>
+
+              <div className="flex min-w-0 items-center gap-2">
+                {editing ? (
+                  <div className="flex items-center gap-1.5 w-full">
                     <input
                       autoFocus
                       value={name}
@@ -155,10 +170,7 @@ export default function RoomTerminal() {
                       onChange={(e) => setName(e.target.value)}
                       onBlur={saveName}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          saveName();
-                        }
-
+                        if (e.key === "Enter") saveName();
                         if (e.key === "Escape") {
                           setEditing(false);
                           setName(user.name);
@@ -166,55 +178,65 @@ export default function RoomTerminal() {
                       }}
                       className="
                         min-w-0
-                        w-full
-                        max-w-full
-                        sm:max-w-60
+                        flex-1
+                        max-w-48
                         border-b
                         border-emerald-500
                         bg-transparent
                         py-0.5
                         font-mono
-                        text-base
+                        text-sm
                         text-emerald-400
                         outline-none
-                        sm:text-lg
+                        sm:text-base
                       "
                     />
-                  ) : (
-                    <>
-                      <h2 className="min-w-0 truncate font-mono text-base text-emerald-400 sm:text-lg">
-                        {user.name}
-                      </h2>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        saveName();
+                      }}
+                      className="rounded p-1 text-emerald-400 hover:bg-emerald-500/20 transition"
+                      title="Save"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="min-w-0 truncate font-mono text-sm text-emerald-400 sm:text-base font-medium">
+                      {user.name}
+                    </h2>
 
-                      <button
-                        type="button"
-                        onClick={() => setEditing(true)}
-                        aria-label="Edit username"
-                        className="
-                          shrink-0
-                          rounded-md
-                          p-1.5
-                          text-zinc-500
-                          transition
-                          hover:bg-zinc-800
-                          hover:text-emerald-400
-                        "
-                      >
-                        <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      aria-label="Edit username"
+                      className="
+                        shrink-0
+                        rounded-md
+                        p-1
+                        text-zinc-500
+                        transition
+                        hover:bg-zinc-800
+                        hover:text-emerald-400
+                      "
+                    >
+                      <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Forms */}
-        <div className="min-w-0">
-          {mode === "create" ? <CreateRoom /> : <JoinRoom />}
         </div>
+      )}
+
+      {/* Forms */}
+      <div className="min-w-0">
+        {mode === "create" ? <CreateRoom /> : <JoinRoom />}
       </div>
-    </section>
+    </div>
   );
 }

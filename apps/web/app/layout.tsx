@@ -119,7 +119,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn("dark", geist.variable, mono.variable)}
     >
-      <body className="min-h-screen bg-background font-sans antialiased overflow-x-hidden">
+      <body className="min-h-screen bg-background font-sans antialiased overflow-x-hidden no-scrollbar">
         <SocketProvider>{children}</SocketProvider>
         <Toaster
           position="top-center"
