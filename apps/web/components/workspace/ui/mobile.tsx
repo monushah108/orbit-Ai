@@ -43,14 +43,16 @@ export function Mobile() {
         className="
           w-[88%]
           max-w-sm
-          border-zinc-800
-          bg-[#050805]
+          border-emerald-900/40
+          bg-[#050805]/95
+          backdrop-blur-xl
           p-0
           text-white
+          no-scrollbar
         "
       >
         {/* Header */}
-        <SheetHeader className="border-b border-zinc-800 px-4 py-3 sm:px-5 sm:py-4">
+        <SheetHeader className="border-b border-emerald-900/40 px-4 py-3 sm:px-5 sm:py-4 bg-black/80">
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-emerald-400" />
@@ -61,7 +63,7 @@ export function Mobile() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="rounded-md border border-zinc-800 bg-zinc-900/50 px-2 py-0.5 font-mono text-[10px] text-zinc-500">
+              <span className="rounded-md border border-emerald-900/60 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-400">
                 {members.length + (withBot ? 1 : 0)}
               </span>
 
@@ -79,7 +81,7 @@ export function Mobile() {
         </SheetHeader>
 
         {/* Members List */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-3 sm:p-4 space-y-1">
           <p className="mb-2 px-1 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
             Connected users ({members.length})
           </p>

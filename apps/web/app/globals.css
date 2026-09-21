@@ -182,3 +182,8 @@ body::-webkit-scrollbar {
   height: 0 !important;
   background: transparent !important;
 }
+
+/* Hide Radix ScrollArea synthetic scrollbars */
+[data-slot="scroll-area-scrollbar"] {
+  display: none !important;
+}

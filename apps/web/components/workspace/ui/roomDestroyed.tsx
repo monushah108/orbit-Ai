@@ -27,15 +27,15 @@ export default function RoomDestroyed() {
     };
   }, [router]);
   return (
-    <div className="flex h-screen flex-col bg-black font-mono text-zinc-100">
+    <div className="flex h-screen h-[100dvh] w-full flex-col overflow-hidden bg-[#020402] font-mono text-zinc-100 no-scrollbar">
       {/* Header */}
-      <header className="h-14 border-b border-zinc-800 px-3.5 sm:px-5 flex items-center justify-between">
+      <header className="h-14 border-b border-emerald-900/40 bg-[#050805]/95 px-3.5 sm:px-5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded border border-emerald-500 bg-emerald-500/10">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-emerald-500/40 bg-emerald-500/10">
             <Zap className="h-4 w-4 text-emerald-400" />
           </div>
 
-          <span className="font-mono text-sm sm:text-base tracking-wide text-white">Orbit AI</span>
+          <span className="font-mono text-sm sm:text-base tracking-wide text-white font-bold">Orbit AI</span>
         </div>
 
         <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-red-400">
@@ -44,7 +44,7 @@ export default function RoomDestroyed() {
       </header>
 
       {/* Body */}
-      <main className="flex flex-1 items-center justify-center p-4 sm:p-6">
+      <main className="flex flex-1 items-center justify-center p-4 sm:p-6 overflow-y-auto no-scrollbar">
         <div className="w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl">
           <div className="border-b border-zinc-800 p-4 sm:px-6 sm:py-5">
             <div className="flex items-center gap-3">

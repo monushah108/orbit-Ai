@@ -26,15 +26,16 @@ export default function MemberList({ open, setOpen }: MemberListProps) {
         border-l
         border-emerald-900/40
         bg-[#030603]
+        no-scrollbar
         transition-all
         duration-300
         ease-in-out
         ${open ? "w-64 lg:w-72 xl:w-80 opacity-100" : "w-0 opacity-0 pointer-events-none border-l-0 overflow-hidden"}
       `}
     >
-      <div className="w-64 lg:w-72 xl:w-80 flex flex-col h-full overflow-hidden">
+      <div className="w-64 lg:w-72 xl:w-80 flex flex-col h-full overflow-hidden no-scrollbar">
         {/* Header - aligns with terminal header h-11 */}
-        <div className="flex h-11 shrink-0 items-center justify-between border-b border-zinc-800 bg-black px-4">
+        <div className="flex h-11 shrink-0 items-center justify-between border-b border-emerald-900/40 bg-black/90 px-4">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-emerald-400" />
             <h2 className="font-mono text-xs font-semibold text-emerald-400">
@@ -43,7 +44,7 @@ export default function MemberList({ open, setOpen }: MemberListProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="rounded border border-zinc-800 bg-zinc-900/60 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400">
+            <span className="rounded border border-emerald-900/60 bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[10px] text-emerald-400">
               {members.length + (withBot ? 1 : 0)}
             </span>
 
@@ -60,7 +61,7 @@ export default function MemberList({ open, setOpen }: MemberListProps) {
         </div>
 
         {/* Members List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-1">
           <p className="px-1 pt-1 pb-1.5 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
             Connected ({members.length})
           </p>

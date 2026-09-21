@@ -179,9 +179,9 @@ export default function RoomLeaveGuard() {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 sm:p-6 backdrop-blur-sm font-mono">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 sm:p-6 backdrop-blur-md font-mono no-scrollbar overflow-y-auto">
       <div
-        className="w-full max-w-lg rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl overflow-hidden"
+        className="w-full max-w-lg rounded-xl border border-zinc-800 bg-[#070b07] text-zinc-100 shadow-2xl overflow-hidden no-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
