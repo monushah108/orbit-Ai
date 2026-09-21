@@ -4,6 +4,30 @@ import useSocket from "@/context/socketProvider";
 import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
+function formatTime(target: number | string | undefined) {
+  const targetTime = Number(target);
+  if (!targetTime || isNaN(targetTime)) {
+    return { text: "--:--:--", urgent: false, active: false };
+  }
+
+  const remaining = targetTime - Date.now();
+  if (remaining <= 0) {
+    return { text: "00:00:00", urgent: true, active: false };
+  }
+
+  const hours = Math.floor(remaining / (1000 * 60 * 60));
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+  return {
+    text: `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
+    urgent: remaining < 60 * 1000,
+    active: true,
+  };
+}
+
 export default function Timer({
   expiresAt,
   roomId,
@@ -12,35 +36,15 @@ export default function Timer({
   roomId: string;
 }) {
   const { checkRoomExists } = useSocket();
-  const [isUrgent, setIsUrgent] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(() => formatTime(expiresAt).text);
+  const [isUrgent, setIsUrgent] = useState(() => formatTime(expiresAt).urgent);
 
   useEffect(() => {
     const updateTimer = () => {
-      const remaining = expiresAt - Date.now();
-
-      if (remaining <= 0) {
-        setTimeLeft("00:00:00");
-        setIsUrgent(true);
-        return false;
-      }
-
-      if (remaining < 60 * 1000) {
-        setIsUrgent(true);
-      } else {
-        setIsUrgent(false);
-      }
-
-      const hours = Math.floor(remaining / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-      setTimeLeft(
-        `${hours.toString().padStart(2, "0")}:${minutes
-          .toString()
-          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
-      );
-
-      return true;
+      const res = formatTime(expiresAt);
+      setTimeLeft(res.text);
+      setIsUrgent(res.urgent);
+      return res.active;
     };
 
     // Update immediately
@@ -48,14 +52,13 @@ export default function Timer({
 
     const interval = setInterval(() => {
       const active = updateTimer();
-
       if (!active) {
         clearInterval(interval);
       }
     }, 1000);
 
     // Ask server when the timer reaches zero
-    const remaining = Math.max(0, expiresAt - Date.now());
+    const remaining = Math.max(0, Number(expiresAt) - Date.now());
     const timeout = setTimeout(() => {
       checkRoomExists(roomId);
     }, remaining);
@@ -74,7 +77,11 @@ export default function Timer({
           : "border-emerald-900/60 bg-emerald-500/10 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.12)]"
       }`}
     >
-      <Clock className={`h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 ${isUrgent ? "text-red-400" : "text-emerald-400"}`} />
+      <Clock
+        className={`h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 ${
+          isUrgent ? "text-red-400" : "text-emerald-400"
+        }`}
+      />
       <span className="font-semibold tracking-wider">{timeLeft}</span>
     </div>
   );
